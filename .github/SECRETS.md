@@ -6,7 +6,7 @@
 | Secret | Où le trouver |
 |--------|--------------|
 | `SUPABASE_ACCESS_TOKEN` | supabase.com → Account → Access Tokens |
-| `SUPABASE_PROJECT_REF` | Project → Settings → General → Reference ID |
+| `SUPABASE_PROJECT_ID` | Project → Settings → General → Reference ID |
 
 ## Build (CI + Vercel)
 | Secret | Où le trouver |
