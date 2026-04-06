@@ -12,7 +12,7 @@
 | Secret | Où le trouver |
 |--------|--------------|
 | `VITE_SUPABASE_URL` | Project → Settings → API → Project URL |
-| `VITE_SUPABASE_ANON_KEY` | Project → Settings → API → anon public key |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Project → Settings → API → Publishable key |
 | `VITE_VAPID_PUBLIC_KEY` | `node scripts/generate-vapid-keys.js` |
 
 > Les 3 variables `VITE_*` sont aussi à ajouter dans
