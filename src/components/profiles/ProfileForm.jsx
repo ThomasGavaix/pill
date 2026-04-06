@@ -38,7 +38,14 @@ export default function ProfileForm({ profile, onClose }) {
       }
       onClose()
     } catch (err) {
-      setError(err.message)
+      setError(JSON.stringify({
+        message: err.message,
+        code: err.code,
+        details: err.details,
+        hint: err.hint,
+        supabaseUrl: import.meta.env.VITE_SUPABASE_URL || 'NON DÉFINI',
+        hasKey: !!import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      }, null, 2))
       setSaving(false)
     }
   }
@@ -51,7 +58,11 @@ export default function ProfileForm({ profile, onClose }) {
           {profile ? 'Modifier le profil' : 'Nouveau profil'}
         </h2>
 
-        {error && <div className="alert alert-error">{error}</div>}
+        {error && (
+          <div className="alert alert-error" style={{ whiteSpace: 'pre-wrap', fontSize: '0.8rem', wordBreak: 'break-all' }}>
+            {error}
+          </div>
+        )}
 
         {/* Preview */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
