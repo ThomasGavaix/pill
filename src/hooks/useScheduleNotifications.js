@@ -7,7 +7,7 @@ import { scheduleLocalNotification } from '../lib/push'
  */
 export function useScheduleNotifications(schedules, medications, doseLogs) {
   useEffect(() => {
-    if (!schedules.length || Notification.permission !== 'granted') return
+    if (!schedules.length || typeof Notification === 'undefined' || Notification.permission !== 'granted') return
 
     const now = new Date()
     const todayStr = now.toISOString().split('T')[0]

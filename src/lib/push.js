@@ -16,6 +16,9 @@ export async function subscribeToPush(profileId) {
     throw new Error('Les notifications push ne sont pas supportées par votre navigateur.')
   }
 
+  if (typeof Notification === 'undefined') {
+    throw new Error('Les notifications ne sont pas supportées par votre navigateur.')
+  }
   const permission = await Notification.requestPermission()
   if (permission !== 'granted') {
     throw new Error('Permission de notification refusée.')
@@ -70,7 +73,7 @@ export async function isSubscribed() {
 }
 
 export function scheduleLocalNotification(title, body, delayMs) {
-  if (Notification.permission !== 'granted') return
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return
   setTimeout(() => {
     navigator.serviceWorker.ready.then((registration) => {
       registration.showNotification(title, {
