@@ -118,9 +118,9 @@ export default function PrescriptionForm({ prescription, onClose }) {
         name, start_date: startDate, notes,
         meds: meds.map((m) => ({
           ...m,
-          phases: m.phases.map((ph) => ({
+          phases: m.phases.map(({ no_end, ...ph }) => ({
             ...ph,
-            duration_days: ph.no_end ? null : ph.duration_days,
+            duration_days: no_end ? null : ph.duration_days,
           })),
         })),
       }
@@ -194,7 +194,7 @@ export default function PrescriptionForm({ prescription, onClose }) {
                           <option value="" disabled>Sélectionner un médicament...</option>
                           {medications.map((m) => (
                             <option key={m.id} value={m.id}>
-                              {m.name} — {m.dosage} {m.unit}
+                              {m.name}{m.dosage ? ` — ${m.dosage}` : ''} ({m.unit})
                             </option>
                           ))}
                         </select>
@@ -211,9 +211,9 @@ export default function PrescriptionForm({ prescription, onClose }) {
                     </div>
                     <div className="form-row">
                       <div className="form-group">
-                        <label>Dosage</label>
-                        <input type="text" placeholder="1, 500mg..." value={med.dosage}
-                          onChange={(e) => setMed(mi, 'dosage', e.target.value)} required />
+                        <label>Concentration <span style={{fontWeight:400,color:'var(--gray-400)'}}>(optionnel)</span></label>
+                        <input type="text" placeholder="ex: 500mg, 100mg/5ml..." value={med.dosage}
+                          onChange={(e) => setMed(mi, 'dosage', e.target.value)} />
                       </div>
                       <div className="form-group">
                         <label>Unité</label>
