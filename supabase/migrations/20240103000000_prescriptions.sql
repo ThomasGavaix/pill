@@ -49,9 +49,13 @@ alter table prescription_meds enable row level security;
 alter table prescription_phases enable row level security;
 alter table prescription_times enable row level security;
 
+drop policy if exists "Authenticated users only" on prescriptions;
 create policy "Authenticated users only" on prescriptions for all to authenticated using (true) with check (true);
+drop policy if exists "Authenticated users only" on prescription_meds;
 create policy "Authenticated users only" on prescription_meds for all to authenticated using (true) with check (true);
+drop policy if exists "Authenticated users only" on prescription_phases;
 create policy "Authenticated users only" on prescription_phases for all to authenticated using (true) with check (true);
+drop policy if exists "Authenticated users only" on prescription_times;
 create policy "Authenticated users only" on prescription_times for all to authenticated using (true) with check (true);
 
 -- Indexes
