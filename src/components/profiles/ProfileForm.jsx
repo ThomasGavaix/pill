@@ -38,14 +38,7 @@ export default function ProfileForm({ profile, onClose }) {
       }
       onClose()
     } catch (err) {
-      setError(JSON.stringify({
-        message: err.message,
-        code: err.code,
-        details: err.details,
-        hint: err.hint,
-        supabaseUrl: import.meta.env.VITE_SUPABASE_URL || 'NON DÉFINI',
-        hasKey: !!import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-      }, null, 2))
+      setError(err.message)
       setSaving(false)
     }
   }
