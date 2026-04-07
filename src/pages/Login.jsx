@@ -3,22 +3,52 @@ import { supabase } from '../lib/supabase'
 import { useState } from 'react'
 
 export default function Login() {
+  const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [sent, setSent] = useState(false)
 
-  async function handleGoogle() {
+  async function handleSubmit(e) {
+    e.preventDefault()
     setLoading(true)
     setError(null)
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin,
-      },
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email.trim(),
+      options: { emailRedirectTo: window.location.origin },
     })
     if (error) {
       setError(error.message)
       setLoading(false)
+    } else {
+      setSent(true)
+      setLoading(false)
     }
+  }
+
+  if (sent) {
+    return (
+      <div className="login-page">
+        <div className="login-card">
+          <div className="login-logo">📬</div>
+          <h1 className="login-title">Vérifiez vos emails</h1>
+          <p className="login-subtitle">
+            Un lien de connexion a été envoyé à<br />
+            <strong>{email}</strong>
+          </p>
+          <p className="login-note">
+            Cliquez sur le lien dans l'email pour accéder à l'application.<br />
+            Le lien est valable 1 heure.
+          </p>
+          <button
+            className="btn btn-ghost btn-full"
+            style={{ marginTop: 24 }}
+            onClick={() => setSent(false)}
+          >
+            Changer d'adresse email
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -27,26 +57,34 @@ export default function Login() {
         <div className="login-logo">💊</div>
         <h1 className="login-title">PilulierFamille</h1>
         <p className="login-subtitle">
-          Gérez les médicaments de toute la famille
+          Entrez votre adresse email pour recevoir un lien de connexion
         </p>
 
         {error && (
           <div className="alert alert-error">{error}</div>
         )}
 
-        <button
-          className="btn btn-google btn-full btn-lg"
-          onClick={handleGoogle}
-          disabled={loading}
-        >
-          <svg width="20" height="20" viewBox="0 0 48 48">
-            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-          </svg>
-          {loading ? 'Connexion...' : 'Continuer avec Google'}
-        </button>
+        <form onSubmit={handleSubmit} className="stack stack-md">
+          <div className="form-group">
+            <label htmlFor="email">Adresse email</label>
+            <input
+              id="email"
+              type="email"
+              placeholder="votre@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoFocus
+            />
+          </div>
+          <button
+            type="submit"
+            className="btn btn-primary btn-full btn-lg"
+            disabled={loading}
+          >
+            {loading ? 'Envoi...' : 'Recevoir le lien de connexion'}
+          </button>
+        </form>
 
         <p className="login-note">
           Seuls les membres invités peuvent accéder à l'application.

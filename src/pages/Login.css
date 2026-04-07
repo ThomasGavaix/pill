@@ -33,19 +33,6 @@
   line-height: 1.6;
 }
 
-.btn-google {
-  background: var(--white);
-  color: var(--gray-800);
-  border: 2px solid var(--gray-200);
-  box-shadow: var(--shadow-sm);
-  gap: 12px;
-}
-
-.btn-google:hover:not(:disabled) {
-  background: var(--gray-50);
-  border-color: var(--gray-300);
-}
-
 .login-note {
   margin-top: 24px;
   font-size: var(--font-sm);
