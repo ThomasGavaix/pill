@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import ErrorBoundary from './components/ErrorBoundary'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { AppProvider } from './contexts/AppContext'
 import Header from './components/layout/Header'
@@ -30,13 +31,15 @@ function AppShell() {
     <AppProvider>
       <Header />
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <Routes>
-          <Route path="/" element={<Today />} />
-          <Route path="/medications" element={<Medications />} />
-          <Route path="/profiles" element={<Profiles />} />
-          <Route path="/prescriptions" element={<Prescriptions />} />
-          <Route path="/settings" element={<Settings />} />
-        </Routes>
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/" element={<Today />} />
+            <Route path="/medications" element={<Medications />} />
+            <Route path="/profiles" element={<Profiles />} />
+            <Route path="/prescriptions" element={<Prescriptions />} />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
+        </ErrorBoundary>
       </main>
       <BottomNav />
     </AppProvider>
