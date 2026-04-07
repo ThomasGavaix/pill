@@ -47,12 +47,12 @@ export default function Today() {
       const dayNumber = differenceInDays(today, start) + 1
       if (dayNumber < 1) continue
 
-      for (const med of presc.prescription_meds) {
-        for (const phase of med.prescription_phases) {
+      for (const med of (presc.prescription_meds || [])) {
+        for (const phase of (med.prescription_phases || [])) {
           const phaseEnd = phase.start_day + phase.duration_days - 1
           if (dayNumber < phase.start_day || dayNumber > phaseEnd) continue
 
-          for (const time of phase.prescription_times) {
+          for (const time of (phase.prescription_times || [])) {
             const log = doseLogs.find(
               (l) => l.prescription_time_id === time.id && l.scheduled_date === todayStr
             )

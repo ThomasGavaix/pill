@@ -7,12 +7,12 @@ const UNITS = ['comprimé(s)', 'gélule(s)', 'ml', 'gouttes', 'bouffée(s)', 'sa
 
 function newTime() { return { time_of_day: '08:00', quantity: '1' } }
 function newPhase() { return { start_day: 1, duration_days: 7, times: [newTime()] } }
-function newMed() {
-  return { name: '', dosage: '1', unit: 'comprimé(s)', color: '#2563eb', phases: [newPhase()] }
+function newMed(base = {}) {
+  return { name: '', dosage: '1', unit: 'comprimé(s)', color: '#2563eb', phases: [newPhase()], ...base }
 }
 
 export default function PrescriptionForm({ prescription, onClose }) {
-  const { createPrescription, updatePrescription } = useApp()
+  const { createPrescription, updatePrescription, medications } = useApp()
 
   const [name, setName] = useState(prescription?.name || '')
   const [startDate, setStartDate] = useState(
@@ -23,9 +23,9 @@ export default function PrescriptionForm({ prescription, onClose }) {
     if (prescription?.prescription_meds?.length) {
       return prescription.prescription_meds.map((m) => ({
         name: m.name, dosage: m.dosage, unit: m.unit, color: m.color,
-        phases: m.prescription_phases.map((ph) => ({
+        phases: (m.prescription_phases || []).map((ph) => ({
           start_day: ph.start_day, duration_days: ph.duration_days,
-          times: ph.prescription_times.map((t) => ({ time_of_day: t.time_of_day, quantity: t.quantity })),
+          times: (ph.prescription_times || []).map((t) => ({ time_of_day: t.time_of_day, quantity: t.quantity })),
         })),
       }))
     }
@@ -39,6 +39,19 @@ export default function PrescriptionForm({ prescription, onClose }) {
   function setMed(mi, key, val) {
     setMeds((prev) => prev.map((m, i) => i === mi ? { ...m, [key]: val } : m))
   }
+
+  function pickExistingMed(mi, medId) {
+    const found = medications.find((m) => m.id === medId)
+    if (!found) return
+    setMeds((prev) => prev.map((m, i) => i !== mi ? m : {
+      ...m,
+      name: found.name,
+      dosage: found.dosage,
+      unit: found.unit,
+      color: found.color,
+    }))
+  }
+
   function addMed() {
     setMeds((prev) => [...prev, newMed()])
     setExpandedMed(meds.length)
@@ -59,8 +72,7 @@ export default function PrescriptionForm({ prescription, onClose }) {
     const lastPhase = meds[mi].phases[meds[mi].phases.length - 1]
     const nextStart = lastPhase.start_day + lastPhase.duration_days
     setMeds((prev) => prev.map((m, i) => i !== mi ? m : {
-      ...m,
-      phases: [...m.phases, { ...newPhase(), start_day: nextStart }],
+      ...m, phases: [...m.phases, { ...newPhase(), start_day: nextStart }],
     }))
   }
   function removePhase(mi, pi) {
@@ -74,8 +86,7 @@ export default function PrescriptionForm({ prescription, onClose }) {
     setMeds((prev) => prev.map((m, i) => i !== mi ? m : {
       ...m,
       phases: m.phases.map((ph, j) => j !== pi ? ph : {
-        ...ph,
-        times: ph.times.map((t, k) => k === ti ? { ...t, [key]: val } : t),
+        ...ph, times: ph.times.map((t, k) => k === ti ? { ...t, [key]: val } : t),
       }),
     }))
   }
@@ -118,7 +129,7 @@ export default function PrescriptionForm({ prescription, onClose }) {
     <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="modal">
         <div className="modal-handle" />
-        <h2 className="modal-title">{prescription ? 'Modifier l\'ordonnance' : 'Nouvelle ordonnance'}</h2>
+        <h2 className="modal-title">{prescription ? "Modifier l'ordonnance" : 'Nouvelle ordonnance'}</h2>
 
         {error && <div className="alert alert-error">{error}</div>}
 
@@ -128,20 +139,18 @@ export default function PrescriptionForm({ prescription, onClose }) {
           <div className="stack stack-md">
             <div className="form-group">
               <label htmlFor="presc-name">Nom de l'ordonnance</label>
-              <input id="presc-name" type="text" placeholder="ex: Bronchite, Angine..." value={name}
-                onChange={(e) => setName(e.target.value)} required autoFocus />
+              <input id="presc-name" type="text" placeholder="ex: Bronchite, Angine..."
+                value={name} onChange={(e) => setName(e.target.value)} required autoFocus />
             </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="presc-date">Date de début</label>
-                <input id="presc-date" type="date" value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)} required />
-              </div>
+            <div className="form-group">
+              <label htmlFor="presc-date">Date de début</label>
+              <input id="presc-date" type="date" value={startDate}
+                onChange={(e) => setStartDate(e.target.value)} required />
             </div>
             <div className="form-group">
               <label htmlFor="presc-notes">Notes (optionnel)</label>
-              <textarea id="presc-notes" placeholder="Prescripteur, instructions..." value={notes}
-                onChange={(e) => setNotes(e.target.value)} />
+              <textarea id="presc-notes" placeholder="Prescripteur, instructions..."
+                value={notes} onChange={(e) => setNotes(e.target.value)} />
             </div>
           </div>
 
@@ -155,11 +164,8 @@ export default function PrescriptionForm({ prescription, onClose }) {
             {meds.map((med, mi) => (
               <div key={mi} className="presc-med-block">
                 {/* Med header */}
-                <button
-                  type="button"
-                  className="presc-med-header"
-                  onClick={() => setExpandedMed(expandedMed === mi ? -1 : mi)}
-                >
+                <button type="button" className="presc-med-header"
+                  onClick={() => setExpandedMed(expandedMed === mi ? -1 : mi)}>
                   <div className="presc-med-color" style={{ background: med.color }} />
                   <span className="presc-med-name">{med.name || 'Médicament ' + (mi + 1)}</span>
                   <span className="presc-med-chevron">{expandedMed === mi ? '▲' : '▼'}</span>
@@ -167,11 +173,30 @@ export default function PrescriptionForm({ prescription, onClose }) {
 
                 {expandedMed === mi && (
                   <div className="presc-med-body stack stack-md">
+
+                    {/* Pick from existing medications */}
+                    {medications.length > 0 && (
+                      <div className="form-group">
+                        <label>Choisir depuis mes médicaments</label>
+                        <select onChange={(e) => pickExistingMed(mi, e.target.value)}
+                          defaultValue="">
+                          <option value="" disabled>Sélectionner un médicament...</option>
+                          {medications.map((m) => (
+                            <option key={m.id} value={m.id}>
+                              {m.name} — {m.dosage} {m.unit}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    <div className="presc-divider" />
+
                     {/* Med fields */}
                     <div className="form-group">
                       <label>Nom</label>
-                      <input type="text" placeholder="Amoxicilline, Ventoline..." value={med.name}
-                        onChange={(e) => setMed(mi, 'name', e.target.value)} required />
+                      <input type="text" placeholder="Amoxicilline, Ventoline..."
+                        value={med.name} onChange={(e) => setMed(mi, 'name', e.target.value)} required />
                     </div>
                     <div className="form-row">
                       <div className="form-group">
@@ -221,16 +246,15 @@ export default function PrescriptionForm({ prescription, onClose }) {
                             <div className="form-group">
                               <label>Début (jour)</label>
                               <input type="number" min="1" value={phase.start_day}
-                                onChange={(e) => setPhase(mi, pi, 'start_day', parseInt(e.target.value))} />
+                                onChange={(e) => setPhase(mi, pi, 'start_day', parseInt(e.target.value) || 1)} />
                             </div>
                             <div className="form-group">
                               <label>Durée (jours)</label>
                               <input type="number" min="1" value={phase.duration_days}
-                                onChange={(e) => setPhase(mi, pi, 'duration_days', parseInt(e.target.value))} />
+                                onChange={(e) => setPhase(mi, pi, 'duration_days', parseInt(e.target.value) || 1)} />
                             </div>
                           </div>
 
-                          {/* Times */}
                           <div className="stack stack-sm" style={{ marginTop: 8 }}>
                             <label>Prises</label>
                             {phase.times.map((time, ti) => (
@@ -244,17 +268,14 @@ export default function PrescriptionForm({ prescription, onClose }) {
                                   <span className="presc-time-unit">{med.unit}</span>
                                 </div>
                                 {phase.times.length > 1 && (
-                                  <button type="button"
-                                    className="btn btn-ghost btn-sm"
+                                  <button type="button" className="btn btn-ghost btn-sm"
                                     style={{ color: 'var(--red-500)', padding: '4px 8px', minHeight: 'auto' }}
                                     onClick={() => removeTime(mi, pi, ti)}>✕</button>
                                 )}
                               </div>
                             ))}
                             <button type="button" className="btn btn-ghost btn-sm"
-                              onClick={() => addTime(mi, pi)}>
-                              + Prise
-                            </button>
+                              onClick={() => addTime(mi, pi)}>+ Prise</button>
                           </div>
                         </div>
                       ))}
@@ -262,9 +283,7 @@ export default function PrescriptionForm({ prescription, onClose }) {
 
                     {meds.length > 1 && (
                       <button type="button" className="btn btn-danger btn-sm"
-                        onClick={() => removeMed(mi)}>
-                        Supprimer ce médicament
-                      </button>
+                        onClick={() => removeMed(mi)}>Supprimer ce médicament</button>
                     )}
                   </div>
                 )}
@@ -274,7 +293,7 @@ export default function PrescriptionForm({ prescription, onClose }) {
 
           <div className="stack stack-sm">
             <button type="submit" className="btn btn-primary btn-full btn-lg" disabled={saving}>
-              {saving ? 'Enregistrement...' : prescription ? 'Enregistrer' : 'Créer l\'ordonnance'}
+              {saving ? 'Enregistrement...' : prescription ? 'Enregistrer' : "Créer l'ordonnance"}
             </button>
             <button type="button" className="btn btn-ghost btn-full" onClick={onClose}>Annuler</button>
           </div>

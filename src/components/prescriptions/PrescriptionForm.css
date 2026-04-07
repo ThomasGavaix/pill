@@ -1,3 +1,9 @@
+.presc-divider {
+  height: 1px;
+  background: var(--gray-200);
+  margin: 4px 0;
+}
+
 .presc-section-header {
   display: flex;
   align-items: center;

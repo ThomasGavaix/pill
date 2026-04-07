@@ -8,9 +8,9 @@ import './Prescriptions.css'
 function prescriptionStatus(presc) {
   const today = new Date()
   const start = parseISO(presc.start_date)
-  const maxDay = Math.max(...presc.prescription_meds.flatMap((m) =>
-    m.prescription_phases.map((ph) => ph.start_day + ph.duration_days - 1)
-  ), 0)
+  const maxDay = Math.max(...(presc.prescription_meds || []).flatMap((m) =>
+    (m.prescription_phases || []).map((ph) => ph.start_day + ph.duration_days - 1)
+  ), 1)
   const end = addDays(start, maxDay - 1)
   if (today < start) return { label: 'À venir', cls: 'badge-blue', end }
   if (today > end) return { label: 'Terminée', cls: 'badge-gray', end }
