@@ -101,7 +101,7 @@ export default function Prescriptions() {
                       <span className="presc-med-dot" style={{ background: med.color }} />
                       <span className="presc-med-summary-name">{med.name}</span>
                       <span className="presc-med-summary-detail">
-                        {med.prescription_phases.length} phase{med.prescription_phases.length > 1 ? 's' : ''}
+                        {med.prescription_phases.length} période{med.prescription_phases.length > 1 ? 's' : ''}
                         {' · '}{med.dosage} {med.unit}
                       </span>
                     </div>

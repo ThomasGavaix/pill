@@ -236,16 +236,16 @@ export default function PrescriptionForm({ prescription, onClose }) {
                     {/* Phases */}
                     <div className="stack stack-md">
                       <div className="presc-section-header">
-                        <div className="section-title" style={{ margin: 0 }}>Phases</div>
+                        <div className="section-title" style={{ margin: 0 }}>Périodes</div>
                         <button type="button" className="btn btn-ghost btn-sm" onClick={() => addPhase(mi)}>
-                          + Phase
+                          + Période
                         </button>
                       </div>
 
                       {med.phases.map((phase, pi) => (
                         <div key={pi} className="presc-phase-block">
                           <div className="presc-phase-header">
-                            <span className="presc-phase-label">Phase {pi + 1}</span>
+                            <span className="presc-phase-label">Période {pi + 1}</span>
                             {med.phases.length > 1 && (
                               <button type="button" className="btn btn-ghost btn-sm"
                                 style={{ color: 'var(--red-500)', padding: '4px 8px', minHeight: 'auto' }}
