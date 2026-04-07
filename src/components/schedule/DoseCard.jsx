@@ -19,13 +19,13 @@ export default function DoseCard({ dose, onMark, isMarking }) {
       </div>
 
       <div className="dose-card-body">
-        <div
-          className="dose-color-dot"
-          style={{ background: dose.color }}
-        />
+        <div className="dose-color-dot" style={{ background: dose.color }} />
         <div className="dose-info">
           <div className="dose-name">{dose.medicationName}</div>
-          <div className="dose-dosage">{dose.dosage} {dose.unit}</div>
+          <div className="dose-dosage">{dose.dosage}{dose.unit ? ` ${dose.unit}` : ''}</div>
+          {dose.prescriptionName && (
+            <div className="dose-prescription">📋 {dose.prescriptionName}</div>
+          )}
         </div>
       </div>
 

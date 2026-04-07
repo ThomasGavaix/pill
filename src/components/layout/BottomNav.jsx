@@ -4,6 +4,7 @@ import './BottomNav.css'
 const NAV_ITEMS = [
   { to: '/', icon: '📅', label: "Aujourd'hui" },
   { to: '/medications', icon: '💊', label: 'Médicaments' },
+  { to: '/prescriptions', icon: '📋', label: 'Ordonnances' },
   { to: '/profiles', icon: '👨‍👩‍👧', label: 'Famille' },
   { to: '/settings', icon: '⚙️', label: 'Réglages' },
 ]

@@ -7,6 +7,7 @@ import Today from './pages/Today'
 import Medications from './pages/Medications'
 import Profiles from './pages/Profiles'
 import Settings from './pages/Settings'
+import Prescriptions from './pages/Prescriptions'
 import Login from './pages/Login'
 
 function AppShell() {
@@ -33,6 +34,7 @@ function AppShell() {
           <Route path="/" element={<Today />} />
           <Route path="/medications" element={<Medications />} />
           <Route path="/profiles" element={<Profiles />} />
+          <Route path="/prescriptions" element={<Prescriptions />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </main>

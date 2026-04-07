@@ -55,6 +55,13 @@
   margin-top: 2px;
 }
 
+.dose-prescription {
+  font-size: var(--font-sm);
+  color: var(--blue-600);
+  margin-top: 4px;
+  font-weight: 600;
+}
+
 .dose-actions {
   display: flex;
   flex-direction: column;

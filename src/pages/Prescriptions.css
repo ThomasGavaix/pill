@@ -1,0 +1,68 @@
+.presc-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.presc-card-name {
+  font-size: var(--font-lg);
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.presc-card-date {
+  font-size: var(--font-sm);
+  color: var(--gray-500);
+  margin-top: 4px;
+}
+
+.presc-meds-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.presc-med-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.presc-med-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.presc-med-summary-name {
+  font-size: var(--font-base);
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.presc-med-summary-detail {
+  font-size: var(--font-sm);
+  color: var(--gray-400);
+}
+
+.presc-notes {
+  font-size: var(--font-sm);
+  color: var(--gray-500);
+  font-style: italic;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+}
+
+.presc-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 12px;
+  border-top: 1px solid var(--gray-100);
+}
