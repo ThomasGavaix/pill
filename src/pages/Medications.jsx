@@ -2,13 +2,11 @@ import { useState } from 'react'
 import { useApp } from '../contexts/AppContext'
 import MedicationCard from '../components/medications/MedicationCard'
 import MedicationForm from '../components/medications/MedicationForm'
-import ScheduleForm from '../components/medications/ScheduleForm'
 
 export default function Medications() {
-  const { activeProfile, medications, schedules, loading } = useApp()
-  const [showMedForm, setShowMedForm] = useState(false)
+  const { activeProfile, medications, loading } = useApp()
+  const [showForm, setShowForm] = useState(false)
   const [editingMed, setEditingMed] = useState(null)
-  const [showScheduleForm, setShowScheduleForm] = useState(null) // medicationId
 
   if (!activeProfile) {
     return (
@@ -22,62 +20,43 @@ export default function Medications() {
     )
   }
 
-  if (loading) {
-    return <div className="loading-page"><div className="spinner" /> Chargement...</div>
-  }
+  if (loading) return <div className="loading-page"><div className="spinner" />Chargement...</div>
 
   return (
     <div className="page">
       <div className="row row-between" style={{ marginBottom: 20 }}>
         <h1 className="page-title" style={{ marginBottom: 0 }}>Médicaments</h1>
-        <button
-          className="btn btn-primary btn-sm"
-          onClick={() => { setEditingMed(null); setShowMedForm(true) }}
-        >
+        <button className="btn btn-primary btn-sm"
+          onClick={() => { setEditingMed(null); setShowForm(true) }}>
           + Ajouter
         </button>
+      </div>
+
+      <div className="alert alert-info" style={{ marginBottom: 16 }}>
+        Gérez votre stock ici. La posologie se définit dans <strong>Ordonnances</strong>.
       </div>
 
       {medications.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">💊</div>
           <div className="empty-state-title">Aucun médicament</div>
-          <div className="empty-state-text">
-            Ajoutez les médicaments de {activeProfile.name}.
-          </div>
-          <button
-            className="btn btn-primary btn-lg"
-            onClick={() => { setEditingMed(null); setShowMedForm(true) }}
-          >
+          <div className="empty-state-text">Ajoutez les médicaments de {activeProfile.name}.</div>
+          <button className="btn btn-primary btn-lg"
+            onClick={() => { setEditingMed(null); setShowForm(true) }}>
             + Ajouter un médicament
           </button>
         </div>
       ) : (
         <div className="stack stack-md">
           {medications.map((med) => (
-            <MedicationCard
-              key={med.id}
-              medication={med}
-              schedules={schedules.filter((s) => s.medication_id === med.id)}
-              onEdit={() => { setEditingMed(med); setShowMedForm(true) }}
-              onAddSchedule={() => setShowScheduleForm(med.id)}
-            />
+            <MedicationCard key={med.id} medication={med}
+              onEdit={() => { setEditingMed(med); setShowForm(true) }} />
           ))}
         </div>
       )}
 
-      {showMedForm && (
-        <MedicationForm
-          medication={editingMed}
-          onClose={() => setShowMedForm(false)}
-        />
-      )}
-
-      {showScheduleForm && (
-        <ScheduleForm
-          medicationId={showScheduleForm}
-          onClose={() => setShowScheduleForm(null)}
-        />
+      {showForm && (
+        <MedicationForm medication={editingMed} onClose={() => setShowForm(false)} />
       )}
     </div>
   )

@@ -49,7 +49,7 @@ export default function Today() {
 
       for (const med of (presc.prescription_meds || [])) {
         for (const phase of (med.prescription_phases || [])) {
-          const phaseEnd = phase.start_day + phase.duration_days - 1
+          const phaseEnd = phase.duration_days == null ? Infinity : phase.start_day + phase.duration_days - 1
           if (dayNumber < phase.start_day || dayNumber > phaseEnd) continue
 
           for (const time of (phase.prescription_times || [])) {

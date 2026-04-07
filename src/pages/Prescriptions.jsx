@@ -8,6 +8,15 @@ import './Prescriptions.css'
 function prescriptionStatus(presc) {
   const today = new Date()
   const start = parseISO(presc.start_date)
+
+  const isPermanent = (presc.prescription_meds || []).some((m) =>
+    (m.prescription_phases || []).some((ph) => ph.duration_days == null)
+  )
+  if (isPermanent) {
+    if (today < start) return { label: 'À venir', cls: 'badge-blue', end: null }
+    return { label: 'Permanent', cls: 'badge-blue', end: null }
+  }
+
   const maxDay = Math.max(...(presc.prescription_meds || []).flatMap((m) =>
     (m.prescription_phases || []).map((ph) => ph.start_day + ph.duration_days - 1)
   ), 1)
@@ -79,7 +88,7 @@ export default function Prescriptions() {
                     <div className="presc-card-name">{presc.name}</div>
                     <div className="presc-card-date">
                       Début : {format(parseISO(presc.start_date), 'd MMMM yyyy', { locale: fr })}
-                      {' · '}Fin : {format(status.end, 'd MMMM yyyy', { locale: fr })}
+                      {status.end && <>{' · '}Fin : {format(status.end, 'd MMMM yyyy', { locale: fr })}</>}
                     </div>
                   </div>
                   <span className={`badge ${status.cls}`}>{status.label}</span>

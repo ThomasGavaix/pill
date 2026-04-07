@@ -6,7 +6,7 @@ const COLORS = ['#2563eb', '#7c3aed', '#db2777', '#dc2626', '#ea580c', '#ca8a04'
 const UNITS = ['comprimé(s)', 'gélule(s)', 'ml', 'gouttes', 'bouffée(s)', 'sachet(s)', 'patch(s)', 'autre']
 
 function newTime() { return { time_of_day: '08:00', quantity: '1' } }
-function newPhase() { return { start_day: 1, duration_days: 7, times: [newTime()] } }
+function newPhase() { return { start_day: 1, duration_days: 7, no_end: false, times: [newTime()] } }
 function newMed(base = {}) {
   return { name: '', dosage: '1', unit: 'comprimé(s)', color: '#2563eb', phases: [newPhase()], ...base }
 }
@@ -24,7 +24,9 @@ export default function PrescriptionForm({ prescription, onClose }) {
       return prescription.prescription_meds.map((m) => ({
         name: m.name, dosage: m.dosage, unit: m.unit, color: m.color,
         phases: (m.prescription_phases || []).map((ph) => ({
-          start_day: ph.start_day, duration_days: ph.duration_days,
+          start_day: ph.start_day,
+          duration_days: ph.duration_days ?? 7,
+          no_end: ph.duration_days == null,
           times: (ph.prescription_times || []).map((t) => ({ time_of_day: t.time_of_day, quantity: t.quantity })),
         })),
       }))
@@ -112,7 +114,16 @@ export default function PrescriptionForm({ prescription, onClose }) {
     setSaving(true)
     setError(null)
     try {
-      const data = { name, start_date: startDate, notes, meds }
+      const data = {
+        name, start_date: startDate, notes,
+        meds: meds.map((m) => ({
+          ...m,
+          phases: m.phases.map((ph) => ({
+            ...ph,
+            duration_days: ph.no_end ? null : ph.duration_days,
+          })),
+        })),
+      }
       if (prescription) {
         await updatePrescription(prescription.id, data)
       } else {
@@ -248,12 +259,19 @@ export default function PrescriptionForm({ prescription, onClose }) {
                               <input type="number" min="1" value={phase.start_day}
                                 onChange={(e) => setPhase(mi, pi, 'start_day', parseInt(e.target.value) || 1)} />
                             </div>
-                            <div className="form-group">
-                              <label>Durée (jours)</label>
-                              <input type="number" min="1" value={phase.duration_days}
-                                onChange={(e) => setPhase(mi, pi, 'duration_days', parseInt(e.target.value) || 1)} />
-                            </div>
+                            {!phase.no_end && (
+                              <div className="form-group">
+                                <label>Durée (jours)</label>
+                                <input type="number" min="1" value={phase.duration_days}
+                                  onChange={(e) => setPhase(mi, pi, 'duration_days', parseInt(e.target.value) || 1)} />
+                              </div>
+                            )}
                           </div>
+                          <label className="presc-no-end-label">
+                            <input type="checkbox" checked={phase.no_end}
+                              onChange={(e) => setPhase(mi, pi, 'no_end', e.target.checked)} />
+                            Sans fin (traitement permanent)
+                          </label>
 
                           <div className="stack stack-sm" style={{ marginTop: 8 }}>
                             <label>Prises</label>
