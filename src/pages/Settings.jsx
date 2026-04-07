@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../contexts/AppContext'
+import { useAuth } from '../contexts/AuthContext'
 import { subscribeToPush, unsubscribeFromPush, isSubscribed } from '../lib/push'
 import './Settings.css'
 
 export default function Settings() {
   const { activeProfile } = useApp()
+  const { user, signOut } = useAuth()
   const [pushEnabled, setPushEnabled] = useState(false)
   const [pushLoading, setPushLoading] = useState(false)
   const [pushError, setPushError] = useState(null)
@@ -107,6 +109,22 @@ export default function Settings() {
             <span className="settings-label">Stockage</span>
             <span className="settings-value">Supabase</span>
           </div>
+        </div>
+      </div>
+
+      {/* Compte */}
+      <div className="section">
+        <div className="section-title">Compte</div>
+        <div className="card">
+          <div className="settings-row" style={{ marginBottom: 16 }}>
+            <div className="settings-info">
+              <div className="settings-label">Connecté en tant que</div>
+              <div className="settings-desc">{user?.email}</div>
+            </div>
+          </div>
+          <button className="btn btn-danger btn-full" onClick={signOut}>
+            Se déconnecter
+          </button>
         </div>
       </div>
 
