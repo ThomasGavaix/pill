@@ -9,6 +9,7 @@ import './Today.css'
 export default function Today() {
   const { activeProfile, medications, schedules, doseLogs, prescriptions, markDose, loading } = useApp()
   const [marking, setMarking] = useState(null)
+  const [markError, setMarkError] = useState(null)
 
   useScheduleNotifications(schedules, medications, doseLogs)
 
@@ -86,12 +87,13 @@ export default function Today() {
 
   async function handleMark(dose, status) {
     setMarking(dose.key + status)
+    setMarkError(null)
     try {
       await markDose(
         dose.scheduleId, dose.medicationId, todayStr, dose.time, status, dose.prescriptionTimeId
       )
     } catch (err) {
-      console.error(err)
+      setMarkError(err.message)
     } finally {
       setMarking(null)
     }
@@ -124,6 +126,8 @@ export default function Today() {
           </div>
         )}
       </div>
+
+      {markError && <div className="alert alert-error" style={{ marginBottom: 12 }}>{markError}</div>}
 
       {todayDoses.length === 0 ? (
         <div className="empty-state">
