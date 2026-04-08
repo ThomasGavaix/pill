@@ -278,6 +278,30 @@ export function AppProvider({ children }) {
     })
   }, [createPrescription])
 
+  const cancelAdHocDose = useCallback(async (logId) => {
+    const { error } = await supabase.from('dose_logs').delete().eq('id', logId)
+    if (error) throw error
+    setDoseLogs((prev) => prev.filter((l) => l.id !== logId))
+  }, [])
+
+  const logAdHocDose = useCallback(async (medicationId, time) => {
+    const today = new Date().toISOString().split('T')[0]
+    const { data, error } = await supabase
+      .from('dose_logs')
+      .insert({
+        medication_id: medicationId,
+        profile_id: activeProfile.id,
+        scheduled_date: today,
+        scheduled_time: time,
+        status: 'taken',
+        taken_at: new Date().toISOString(),
+      })
+      .select().single()
+    if (error) throw error
+    setDoseLogs((prev) => [...prev, data])
+    return data
+  }, [activeProfile])
+
   const refreshToday = useCallback(() => {
     if (activeProfile) loadTodayDoseLogs(activeProfile.id)
   }, [activeProfile])
@@ -289,7 +313,7 @@ export function AppProvider({ children }) {
       switchProfile, createProfile, updateProfile, deleteProfile,
       createMedication, updateMedication, deleteMedication,
       createSchedule, deleteSchedule,
-      markDose, refreshToday,
+      markDose, logAdHocDose, cancelAdHocDose, refreshToday,
       createPrescription, updatePrescription, deletePrescription, duplicatePrescription,
       reload: loadProfiles,
     }}>

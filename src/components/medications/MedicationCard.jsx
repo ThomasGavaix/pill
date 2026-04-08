@@ -2,10 +2,19 @@ import { useState } from 'react'
 import { useApp } from '../../contexts/AppContext'
 import './MedicationCard.css'
 
+function nowTime() {
+  const d = new Date()
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+
 export default function MedicationCard({ medication, onEdit }) {
-  const { deleteMedication } = useApp()
+  const { deleteMedication, logAdHocDose } = useApp()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [showTake, setShowTake] = useState(false)
+  const [takeTime, setTakeTime] = useState(nowTime)
+  const [taking, setTaking] = useState(false)
+  const [takeError, setTakeError] = useState(null)
 
   async function handleDelete() {
     setDeleting(true)
@@ -14,6 +23,19 @@ export default function MedicationCard({ medication, onEdit }) {
     } catch (err) {
       console.error(err)
       setDeleting(false)
+    }
+  }
+
+  async function handleTake() {
+    setTaking(true)
+    setTakeError(null)
+    try {
+      await logAdHocDose(medication.id, takeTime)
+      setShowTake(false)
+    } catch (err) {
+      setTakeError(err.message)
+    } finally {
+      setTaking(false)
     }
   }
 
@@ -39,6 +61,26 @@ export default function MedicationCard({ medication, onEdit }) {
             onClick={() => setConfirmDelete(true)} title="Supprimer">🗑️</button>
         </div>
       </div>
+
+      <button className="btn btn-success btn-full" style={{ marginTop: 8 }}
+        onClick={() => { setShowTake(true); setTakeTime(nowTime()); setTakeError(null) }}>
+        + Prendre maintenant
+      </button>
+
+      {showTake && (
+        <div className="med-confirm">
+          <p>Heure de prise — <strong>{medication.name}</strong></p>
+          <input type="time" value={takeTime} onChange={(e) => setTakeTime(e.target.value)}
+            style={{ marginTop: 8, marginBottom: 8 }} />
+          {takeError && <div className="alert alert-error" style={{ marginBottom: 8 }}>{takeError}</div>}
+          <div className="row row-gap-sm">
+            <button className="btn btn-success btn-sm" onClick={handleTake} disabled={taking}>
+              {taking ? '...' : 'Confirmer'}
+            </button>
+            <button className="btn btn-ghost btn-sm" onClick={() => setShowTake(false)}>Annuler</button>
+          </div>
+        </div>
+      )}
 
       {confirmDelete && (
         <div className="med-confirm">

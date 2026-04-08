@@ -7,7 +7,7 @@ import { useScheduleNotifications } from '../hooks/useScheduleNotifications'
 import './Today.css'
 
 export default function Today() {
-  const { activeProfile, medications, schedules, doseLogs, prescriptions, markDose, loading } = useApp()
+  const { activeProfile, medications, schedules, doseLogs, prescriptions, markDose, cancelAdHocDose, loading } = useApp()
   const [marking, setMarking] = useState(null)
   const [markError, setMarkError] = useState(null)
 
@@ -76,6 +76,27 @@ export default function Today() {
       }
     }
 
+    // ── Ad-hoc doses (prise manuelle depuis la liste médicaments) ────────────
+    for (const log of doseLogs) {
+      if (log.schedule_id || log.prescription_time_id) continue
+      if (log.scheduled_date !== todayStr) continue
+      const med = medMap[log.medication_id]
+      doses.push({
+        key: `adhoc-${log.id}`,
+        scheduleId: null,
+        prescriptionTimeId: null,
+        medicationId: log.medication_id,
+        medicationName: med?.name || 'Médicament',
+        dosage: '',
+        unit: med?.unit || '',
+        color: med?.color || '#6b7280',
+        time: log.scheduled_time,
+        status: log.status,
+        source: 'adhoc',
+        logId: log.id,
+      })
+    }
+
     return doses.sort((a, b) => a.time.localeCompare(b.time))
   }, [schedules, medications, doseLogs, prescriptions, todayStr, todayDow, today])
 
@@ -89,9 +110,13 @@ export default function Today() {
     setMarking(dose.key + status)
     setMarkError(null)
     try {
-      await markDose(
-        dose.scheduleId, dose.medicationId, todayStr, dose.time, status, dose.prescriptionTimeId
-      )
+      if (dose.source === 'adhoc') {
+        await cancelAdHocDose(dose.logId)
+      } else {
+        await markDose(
+          dose.scheduleId, dose.medicationId, todayStr, dose.time, status, dose.prescriptionTimeId
+        )
+      }
     } catch (err) {
       setMarkError(err.message)
     } finally {
