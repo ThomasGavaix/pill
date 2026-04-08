@@ -28,7 +28,6 @@ export const supabase = createClient(
   {
     auth: {
       storage: cookieStorage,
-      flowType: 'pkce',
     },
   }
 )
