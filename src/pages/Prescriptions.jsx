@@ -48,7 +48,6 @@ function formatMedPosology(med) {
 function prescriptionStatus(presc) {
   const today = new Date()
   const start = parseISO(presc.start_date)
-
   const isPermanent = (presc.prescription_meds || []).some((m) =>
     (m.prescription_phases || []).some((ph) => ph.duration_days == null)
   )
@@ -56,7 +55,6 @@ function prescriptionStatus(presc) {
     if (today < start) return { label: 'À venir', cls: 'badge-blue', end: null }
     return { label: 'Permanent', cls: 'badge-blue', end: null }
   }
-
   const maxDay = Math.max(...(presc.prescription_meds || []).flatMap((m) =>
     (m.prescription_phases || []).map((ph) => ph.start_day + ph.duration_days - 1)
   ), 1)
@@ -67,13 +65,81 @@ function prescriptionStatus(presc) {
   return { label: `Jour ${dayNum}/${maxDay}`, cls: 'badge-green', end }
 }
 
+function PrescriptionSheet({ presc, onClose, onEdit, onDuplicate, onDelete }) {
+  const [step, setStep] = useState('actions') // 'actions' | 'duplicate' | 'delete'
+  const [dupDate, setDupDate] = useState(new Date().toISOString().split('T')[0])
+  const [loading, setLoading] = useState(false)
+
+  async function handleDuplicate() {
+    setLoading(true)
+    await onDuplicate(presc, dupDate)
+    onClose()
+  }
+
+  async function handleDelete() {
+    setLoading(true)
+    await onDelete(presc.id)
+    onClose()
+  }
+
+  return (
+    <div className="action-sheet-overlay" onClick={onClose}>
+      <div className="action-sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="action-sheet-title">{presc.name}</div>
+
+        {step === 'actions' && (
+          <>
+            <button className="action-sheet-btn" onClick={() => { onClose(); onEdit(presc) }}>
+              ✏️ Modifier
+            </button>
+            <button className="action-sheet-btn" onClick={() => setStep('duplicate')}>
+              📋 Dupliquer
+            </button>
+            <button className="action-sheet-btn action-sheet-btn--danger"
+              onClick={() => setStep('delete')}>
+              🗑️ Supprimer
+            </button>
+          </>
+        )}
+
+        {step === 'duplicate' && (
+          <>
+            <div className="action-sheet-time-picker">
+              <label>Nouvelle date de début</label>
+              <input type="date" value={dupDate} onChange={(e) => setDupDate(e.target.value)} />
+            </div>
+            <button className="action-sheet-btn action-sheet-btn--primary"
+              onClick={handleDuplicate} disabled={loading}>
+              {loading ? '...' : 'Créer une copie'}
+            </button>
+            <button className="action-sheet-btn" onClick={() => setStep('actions')}>Retour</button>
+          </>
+        )}
+
+        {step === 'delete' && (
+          <>
+            <p className="action-sheet-message">
+              Supprimer <strong>{presc.name}</strong> définitivement ?
+            </p>
+            <button className="action-sheet-btn action-sheet-btn--danger"
+              onClick={handleDelete} disabled={loading}>
+              {loading ? '...' : 'Supprimer'}
+            </button>
+            <button className="action-sheet-btn" onClick={() => setStep('actions')}>Annuler</button>
+          </>
+        )}
+
+        <button className="action-sheet-cancel" onClick={onClose}>Fermer</button>
+      </div>
+    </div>
+  )
+}
+
 export default function Prescriptions() {
   const { activeProfile, prescriptions, deletePrescription, duplicatePrescription, loading } = useApp()
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState(null)
-  const [duplicating, setDuplicating] = useState(null)
-  const [dupDate, setDupDate] = useState(new Date().toISOString().split('T')[0])
-  const [confirmDelete, setConfirmDelete] = useState(null)
+  const [activeSheet, setActiveSheet] = useState(null)
 
   if (!activeProfile) {
     return (
@@ -89,16 +155,6 @@ export default function Prescriptions() {
 
   if (loading) return <div className="loading-page"><div className="spinner" />Chargement...</div>
 
-  async function handleDuplicate() {
-    await duplicatePrescription(duplicating, dupDate)
-    setDuplicating(null)
-  }
-
-  async function handleDelete(id) {
-    await deletePrescription(id)
-    setConfirmDelete(null)
-  }
-
   return (
     <div className="page">
       <div className="row row-between" style={{ marginBottom: 20 }}>
@@ -112,95 +168,58 @@ export default function Prescriptions() {
         <div className="empty-state">
           <div className="empty-state-icon">📋</div>
           <div className="empty-state-title">Aucune ordonnance</div>
-          <div className="empty-state-text">Créez une ordonnance pour suivre un traitement temporaire.</div>
+          <div className="empty-state-text">Créez une ordonnance pour suivre un traitement.</div>
           <button className="btn btn-primary btn-lg" onClick={() => { setEditing(null); setShowForm(true) }}>
             + Nouvelle ordonnance
           </button>
         </div>
       ) : (
-        <div className="stack stack-md">
+        <div className="ios-list">
           {prescriptions.map((presc) => {
             const status = prescriptionStatus(presc)
             return (
-              <div key={presc.id} className="card presc-card">
-                <div className="presc-card-header">
-                  <div>
-                    <div className="presc-card-name">{presc.name}</div>
-                    <div className="presc-card-date">
-                      Début : {format(parseISO(presc.start_date), 'd MMMM yyyy', { locale: fr })}
-                      {status.end && <>{' · '}Fin : {format(status.end, 'd MMMM yyyy', { locale: fr })}</>}
-                    </div>
+              <button key={presc.id} className="presc-row" onClick={() => setActiveSheet(presc)}>
+                <div className="presc-row-main">
+                  <div className="presc-row-top">
+                    <span className="presc-row-name">{presc.name}</span>
+                    <span className={`badge ${status.cls}`}>{status.label}</span>
                   </div>
-                  <span className={`badge ${status.cls}`}>{status.label}</span>
-                </div>
-
-                {/* Medications summary */}
-                <div className="presc-meds-list">
-                  {presc.prescription_meds.map((med) => (
-                    <div key={med.id} className="presc-med-summary">
-                      <span className="presc-med-dot" style={{ background: med.color }} />
-                      <div className="presc-med-summary-body">
-                        <span className="presc-med-summary-name">
-                          {med.name}{med.dosage ? ` ${med.dosage}` : ''}
-                        </span>
-                        {formatMedPosology(med).map((line, i) => (
-                          <span key={i} className="presc-med-posology-line">{line}</span>
-                        ))}
+                  <div className="presc-row-date">
+                    {format(parseISO(presc.start_date), 'd MMM yyyy', { locale: fr })}
+                    {status.end && <> → {format(status.end, 'd MMM yyyy', { locale: fr })}</>}
+                  </div>
+                  <div className="presc-row-meds">
+                    {presc.prescription_meds.map((med) => (
+                      <div key={med.id} className="presc-row-med">
+                        <span className="presc-med-dot" style={{ background: med.color }} />
+                        <div className="presc-med-summary-body">
+                          <span className="presc-med-summary-name">
+                            {med.name}{med.dosage ? ` ${med.dosage}` : ''}
+                          </span>
+                          {formatMedPosology(med).map((line, i) => (
+                            <span key={i} className="presc-med-posology-line">{line}</span>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-
-                {presc.notes && (
-                  <div className="presc-notes">{presc.notes}</div>
-                )}
-
-                <div className="presc-actions">
-                  <button className="btn btn-ghost btn-sm" onClick={() => { setEditing(presc); setShowForm(true) }}>
-                    ✏️ Modifier
-                  </button>
-                  <button className="btn btn-ghost btn-sm" onClick={() => setDuplicating(presc)}>
-                    📋 Dupliquer
-                  </button>
-                  <button className="btn btn-ghost btn-sm" style={{ color: 'var(--red-500)' }}
-                    onClick={() => setConfirmDelete(presc)}>
-                    🗑️
-                  </button>
-                </div>
-
-                {confirmDelete?.id === presc.id && (
-                  <div className="med-confirm">
-                    <p>Supprimer <strong>{presc.name}</strong> ?</p>
-                    <div className="row row-gap-sm" style={{ marginTop: 12 }}>
-                      <button className="btn btn-danger btn-sm" onClick={() => handleDelete(presc.id)}>Supprimer</button>
-                      <button className="btn btn-ghost btn-sm" onClick={() => setConfirmDelete(null)}>Annuler</button>
-                    </div>
+                    ))}
                   </div>
-                )}
-              </div>
+                  {presc.notes && <div className="presc-row-notes">{presc.notes}</div>}
+                </div>
+                <span className="med-row-chevron">›</span>
+              </button>
             )
           })}
         </div>
       )}
 
-      {/* Duplicate modal */}
-      {duplicating && (
-        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setDuplicating(null)}>
-          <div className="modal">
-            <div className="modal-handle" />
-            <h2 className="modal-title">Dupliquer « {duplicating.name} »</h2>
-            <div className="form-group" style={{ marginBottom: 24 }}>
-              <label htmlFor="dup-date">Nouvelle date de début</label>
-              <input id="dup-date" type="date" value={dupDate} onChange={(e) => setDupDate(e.target.value)} />
-            </div>
-            <div className="stack stack-sm">
-              <button className="btn btn-primary btn-full btn-lg" onClick={handleDuplicate}>
-                Créer une copie
-              </button>
-              <button className="btn btn-ghost btn-full" onClick={() => setDuplicating(null)}>Annuler</button>
-            </div>
-          </div>
-        </div>
+      {activeSheet && (
+        <PrescriptionSheet
+          presc={activeSheet}
+          onClose={() => setActiveSheet(null)}
+          onEdit={(p) => { setEditing(p); setShowForm(true) }}
+          onDuplicate={duplicatePrescription}
+          onDelete={deletePrescription}
+        />
       )}
 
       {showForm && (
