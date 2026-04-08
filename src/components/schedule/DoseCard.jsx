@@ -14,7 +14,11 @@ export default function DoseCard({ dose, onMark, isMarking }) {
   return (
     <div className={`dose-card card ${isTaken ? 'dose-card--taken' : ''}`}>
       <div className="dose-card-header">
-        <div className="dose-time">{dose.time}</div>
+        <div className="dose-time">
+          {isTaken && dose.takenAt
+            ? new Date(dose.takenAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+            : dose.time}
+        </div>
         <span className={`badge ${status.className}`}>{status.label}</span>
       </div>
 

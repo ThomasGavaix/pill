@@ -20,6 +20,11 @@ function getPeriod(time) {
   return 'nuit'
 }
 
+function formatTakenAt(isoString) {
+  const d = new Date(isoString)
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+
 function DoseRow({ dose, onMark, isMarking }) {
   const isTaken = dose.status === 'taken'
   const isSkipped = dose.status === 'skipped'
@@ -30,7 +35,9 @@ function DoseRow({ dose, onMark, isMarking }) {
       <div className="dose-row-info">
         <span className="dose-row-name">{dose.medicationName}</span>
         {dose.dosage ? <span className="dose-row-dosage">{dose.dosage}</span> : null}
-        <span className="dose-row-time">{dose.time}</span>
+        <span className="dose-row-time">
+          {isTaken && dose.takenAt ? formatTakenAt(dose.takenAt) : dose.time}
+        </span>
       </div>
       <div className="dose-row-actions">
         {isTaken ? (
@@ -74,6 +81,7 @@ export default function Today() {
         medicationId: s.medication_id, medicationName: med.name,
         dosage: med.dosage, unit: med.unit, color: med.color,
         time: s.time_of_day, status: log?.status || 'pending', source: 'recurring',
+        takenAt: log?.taken_at || null,
       })
     }
 
@@ -93,7 +101,7 @@ export default function Today() {
               dosage: `${time.quantity} ${med.unit}`, unit: '',
               color: med.color, time: time.time_of_day,
               status: log?.status || 'pending', source: 'prescription',
-              prescriptionName: presc.name,
+              prescriptionName: presc.name, takenAt: log?.taken_at || null,
             })
           }
         }
@@ -109,6 +117,7 @@ export default function Today() {
         medicationId: log.medication_id, medicationName: med?.name || 'Médicament',
         dosage: '', unit: med?.unit || '', color: med?.color || '#6b7280',
         time: log.scheduled_time, status: log.status, source: 'adhoc', logId: log.id,
+        takenAt: log.taken_at || null,
       })
     }
 
