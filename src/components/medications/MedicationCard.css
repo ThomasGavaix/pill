@@ -1,115 +1,61 @@
-.med-row {
+.med-card {
+  position: relative;
+}
+
+.med-card-header {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--gray-100);
-  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
 }
 
-.med-row:last-child {
-  border-bottom: none;
-}
-
-.med-row-color {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+.med-color-bar {
+  width: 5px;
+  border-radius: 4px;
+  min-height: 48px;
+  align-self: stretch;
   flex-shrink: 0;
 }
 
-.med-row-info {
+.med-info {
   flex: 1;
   min-width: 0;
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  flex-wrap: wrap;
 }
 
-.med-row-name {
-  font-size: var(--font-base);
-  font-weight: 600;
-  color: var(--gray-800);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.med-row-unit {
-  font-size: var(--font-sm);
-  color: var(--gray-400);
-  white-space: nowrap;
-}
-
-.med-row-notes {
-  font-size: var(--font-sm);
-  color: var(--gray-400);
-  font-style: italic;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.med-row-take {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 2px solid var(--green-400);
-  color: var(--green-500);
-  background: none;
-  font-size: 20px;
+.med-name {
+  font-size: var(--font-lg);
   font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  color: var(--gray-900);
+}
+
+.med-dosage {
+  font-size: var(--font-base);
+  color: var(--gray-500);
+  margin-top: 2px;
+}
+
+.med-notes {
+  font-size: var(--font-sm);
+  color: var(--gray-400);
+  margin-top: 6px;
+  font-style: italic;
+}
+
+.med-stock-badge {
   flex-shrink: 0;
-  padding: 0;
-  line-height: 1;
-  transition: background 0.15s;
 }
 
-.med-row-take:hover {
-  background: var(--green-50);
-}
-
-.med-row-panel {
-  width: 100%;
-  margin-top: 4px;
-  padding: 12px;
-  background: var(--gray-50);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--gray-200);
+.med-actions-top {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.med-row-panel--danger {
-  background: var(--red-50);
-  border-color: var(--red-100);
-  color: var(--red-700);
-}
-
-.med-row-panel-label {
-  font-size: var(--font-sm);
-  font-weight: 600;
-  color: var(--gray-600);
-}
-
-.med-row-error {
-  font-size: var(--font-sm);
-  color: var(--red-500);
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .med-confirm {
-  width: 100%;
-  margin-top: 4px;
-  padding: 12px;
-  background: var(--red-50);
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--gray-50);
   border-radius: var(--radius-md);
-  border: 1px solid var(--red-100);
+  border: 1px solid var(--gray-200);
   font-size: var(--font-base);
-  color: var(--red-600);
+  color: var(--gray-700);
 }

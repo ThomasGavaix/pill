@@ -47,7 +47,7 @@ export default function Medications() {
           </button>
         </div>
       ) : (
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="stack stack-md">
           {medications.map((med) => (
             <MedicationCard key={med.id} medication={med}
               onEdit={() => { setEditingMed(med); setShowForm(true) }} />
