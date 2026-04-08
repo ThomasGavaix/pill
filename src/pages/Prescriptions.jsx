@@ -5,6 +5,46 @@ import { useApp } from '../contexts/AppContext'
 import PrescriptionForm from '../components/prescriptions/PrescriptionForm'
 import './Prescriptions.css'
 
+function getPeriodInfo(time) {
+  if (time >= '06:00' && time <= '11:59') return { label: 'le matin', order: 0 }
+  if (time >= '12:00' && time <= '13:59') return { label: 'à midi', order: 1 }
+  if (time >= '14:00' && time <= '20:59') return { label: 'le soir', order: 2 }
+  return { label: 'la nuit', order: 3 }
+}
+
+function joinFr(items) {
+  if (items.length === 1) return items[0]
+  return items.slice(0, -1).join(', ') + ' et ' + items[items.length - 1]
+}
+
+function formatPhase(phase, unit) {
+  const times = phase.prescription_times || []
+  if (!times.length) return null
+  const byQty = {}
+  for (const t of times) {
+    if (!byQty[t.quantity]) byQty[t.quantity] = []
+    byQty[t.quantity].push(t.time_of_day)
+  }
+  return Object.entries(byQty).map(([qty, arr]) => {
+    const periods = arr.map(getPeriodInfo).sort((a, b) => a.order - b.order).map((p) => p.label)
+    return `${qty} ${unit} ${joinFr(periods)}`
+  }).join(' · ')
+}
+
+function formatMedPosology(med) {
+  const phases = med.prescription_phases || []
+  if (!phases.length) return []
+  return phases.map((phase) => {
+    const line = formatPhase(phase, med.unit)
+    if (!line) return null
+    if (phases.length === 1) return line
+    const range = phase.duration_days == null
+      ? `À partir de J${phase.start_day}`
+      : `J${phase.start_day}–J${phase.start_day + phase.duration_days - 1}`
+    return `${range} : ${line}`
+  }).filter(Boolean)
+}
+
 function prescriptionStatus(presc) {
   const today = new Date()
   const start = parseISO(presc.start_date)
@@ -99,11 +139,14 @@ export default function Prescriptions() {
                   {presc.prescription_meds.map((med) => (
                     <div key={med.id} className="presc-med-summary">
                       <span className="presc-med-dot" style={{ background: med.color }} />
-                      <span className="presc-med-summary-name">{med.name}</span>
-                      <span className="presc-med-summary-detail">
-                        {med.prescription_phases.length} période{med.prescription_phases.length > 1 ? 's' : ''}
-                        {' · '}{med.dosage} {med.unit}
-                      </span>
+                      <div className="presc-med-summary-body">
+                        <span className="presc-med-summary-name">
+                          {med.name}{med.dosage ? ` ${med.dosage}` : ''}
+                        </span>
+                        {formatMedPosology(med).map((line, i) => (
+                          <span key={i} className="presc-med-posology-line">{line}</span>
+                        ))}
+                      </div>
                     </div>
                   ))}
                 </div>

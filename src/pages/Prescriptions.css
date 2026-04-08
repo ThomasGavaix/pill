@@ -27,8 +27,8 @@
 
 .presc-med-summary {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: flex-start;
+  gap: 10px;
 }
 
 .presc-med-dot {
@@ -36,6 +36,13 @@
   height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.presc-med-summary-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .presc-med-summary-name {
@@ -44,9 +51,9 @@
   color: var(--gray-800);
 }
 
-.presc-med-summary-detail {
+.presc-med-posology-line {
   font-size: var(--font-sm);
-  color: var(--gray-400);
+  color: var(--gray-500);
 }
 
 .presc-notes {
