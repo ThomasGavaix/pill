@@ -9,19 +9,28 @@ function nowTime() {
 
 export default function MedicationCard({ medication, onEdit }) {
   const { deleteMedication, logAdHocDose } = useApp()
-  const [expanded, setExpanded] = useState(false)
-  const [confirmDelete, setConfirmDelete] = useState(false)
-  const [deleting, setDeleting] = useState(false)
-  const [showTake, setShowTake] = useState(false)
+  const [sheet, setSheet] = useState(null) // null | 'actions' | 'take' | 'delete'
   const [takeTime, setTakeTime] = useState(nowTime)
   const [taking, setTaking] = useState(false)
-  const [takeError, setTakeError] = useState(null)
+  const [deleting, setDeleting] = useState(false)
+  const [error, setError] = useState(null)
 
-  function handleToggle() {
-    setExpanded((v) => !v)
-    if (expanded) {
-      setConfirmDelete(false)
-      setShowTake(false)
+  function openSheet(s) {
+    setError(null)
+    setTakeTime(nowTime())
+    setSheet(s)
+  }
+
+  async function handleTake() {
+    setTaking(true)
+    setError(null)
+    try {
+      await logAdHocDose(medication.id, takeTime)
+      setSheet(null)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setTaking(false)
     }
   }
 
@@ -30,86 +39,82 @@ export default function MedicationCard({ medication, onEdit }) {
     try {
       await deleteMedication(medication.id)
     } catch (err) {
-      console.error(err)
+      setError(err.message)
       setDeleting(false)
     }
   }
 
-  async function handleTake() {
-    setTaking(true)
-    setTakeError(null)
-    try {
-      await logAdHocDose(medication.id, takeTime)
-      setShowTake(false)
-      setExpanded(false)
-    } catch (err) {
-      setTakeError(err.message)
-    } finally {
-      setTaking(false)
-    }
-  }
-
   return (
-    <div className={`med-card card ${expanded ? 'med-card--expanded' : ''}`}>
-      <button className="med-card-row" onClick={handleToggle}>
-        <div className="med-color-bar" style={{ background: medication.color }} />
-        <div className="med-info">
-          <div className="med-name">{medication.name}</div>
-          <div className="med-dosage">{medication.unit}</div>
-          {medication.notes && <div className="med-notes">{medication.notes}</div>}
+    <>
+      <button className="med-row" onClick={() => openSheet('actions')}>
+        <div className="med-row-color" style={{ background: medication.color }} />
+        <div className="med-row-info">
+          <span className="med-row-name">{medication.name}</span>
+          <span className="med-row-unit">{medication.unit}</span>
         </div>
         {medication.stock_count != null && (
-          <span className={`badge ${medication.stock_count <= 5 ? 'badge-red' : 'badge-gray'}`}>
-            {medication.stock_count <= 0 ? '⚠️ Rupture' : `Stock : ${medication.stock_count}`}
+          <span className={`badge ${medication.stock_count <= 5 ? 'badge-red' : 'badge-gray'} med-row-stock`}>
+            {medication.stock_count <= 0 ? '⚠️ Rupture' : medication.stock_count}
           </span>
         )}
-        <span className="med-chevron">{expanded ? '▲' : '▼'}</span>
+        {medication.notes && <span className="med-row-notes-dot" title={medication.notes}>ℹ️</span>}
+        <span className="med-row-chevron">›</span>
       </button>
 
-      {expanded && (
-        <div className="med-card-actions">
-          <button className="btn btn-success btn-full"
-            onClick={() => { setShowTake(true); setTakeTime(nowTime()); setTakeError(null) }}>
-            + Prendre maintenant
-          </button>
-          <div className="row row-gap-sm">
-            <button className="btn btn-ghost btn-full btn-sm" onClick={() => { onEdit(); setExpanded(false) }}>
-              ✏️ Modifier
-            </button>
-            <button className="btn btn-ghost btn-full btn-sm" style={{ color: 'var(--red-500)' }}
-              onClick={() => setConfirmDelete(true)}>
-              🗑️ Supprimer
-            </button>
-          </div>
+      {/* Action sheet overlay */}
+      {sheet && (
+        <div className="action-sheet-overlay" onClick={() => setSheet(null)}>
+          <div className="action-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="action-sheet-title">{medication.name}</div>
 
-          {showTake && (
-            <div className="med-confirm">
-              <p>Heure de prise — <strong>{medication.name}</strong></p>
-              <input type="time" value={takeTime} onChange={(e) => setTakeTime(e.target.value)}
-                style={{ marginTop: 8, marginBottom: 8 }} />
-              {takeError && <div className="alert alert-error" style={{ marginBottom: 8 }}>{takeError}</div>}
-              <div className="row row-gap-sm">
-                <button className="btn btn-success btn-sm" onClick={handleTake} disabled={taking}>
-                  {taking ? '...' : 'Confirmer'}
+            {sheet === 'actions' && (
+              <>
+                <button className="action-sheet-btn action-sheet-btn--primary"
+                  onClick={() => openSheet('take')}>
+                  + Prendre maintenant
                 </button>
-                <button className="btn btn-ghost btn-sm" onClick={() => setShowTake(false)}>Annuler</button>
-              </div>
-            </div>
-          )}
+                <button className="action-sheet-btn" onClick={() => { setSheet(null); onEdit() }}>
+                  ✏️ Modifier
+                </button>
+                <button className="action-sheet-btn action-sheet-btn--danger"
+                  onClick={() => openSheet('delete')}>
+                  🗑️ Supprimer
+                </button>
+              </>
+            )}
 
-          {confirmDelete && (
-            <div className="med-confirm med-confirm--danger">
-              <p>Supprimer <strong>{medication.name}</strong> ?</p>
-              <div className="row row-gap-sm" style={{ marginTop: 12 }}>
-                <button className="btn btn-danger btn-sm" onClick={handleDelete} disabled={deleting}>
+            {sheet === 'take' && (
+              <>
+                <div className="action-sheet-time-picker">
+                  <label>Heure de prise</label>
+                  <input type="time" value={takeTime} onChange={(e) => setTakeTime(e.target.value)} />
+                </div>
+                {error && <div className="alert alert-error">{error}</div>}
+                <button className="action-sheet-btn action-sheet-btn--primary"
+                  onClick={handleTake} disabled={taking}>
+                  {taking ? 'Enregistrement...' : 'Confirmer'}
+                </button>
+                <button className="action-sheet-btn" onClick={() => openSheet('actions')}>Retour</button>
+              </>
+            )}
+
+            {sheet === 'delete' && (
+              <>
+                <p className="action-sheet-message">
+                  Supprimer <strong>{medication.name}</strong> définitivement ?
+                </p>
+                <button className="action-sheet-btn action-sheet-btn--danger"
+                  onClick={handleDelete} disabled={deleting}>
                   {deleting ? '...' : 'Supprimer'}
                 </button>
-                <button className="btn btn-ghost btn-sm" onClick={() => setConfirmDelete(false)}>Annuler</button>
-              </div>
-            </div>
-          )}
+                <button className="action-sheet-btn" onClick={() => openSheet('actions')}>Annuler</button>
+              </>
+            )}
+
+            <button className="action-sheet-cancel" onClick={() => setSheet(null)}>Fermer</button>
+          </div>
         </div>
       )}
-    </div>
+    </>
   )
 }

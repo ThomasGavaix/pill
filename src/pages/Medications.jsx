@@ -47,7 +47,7 @@ export default function Medications() {
           </button>
         </div>
       ) : (
-        <div className="stack stack-md">
+        <div className="ios-list">
           {medications.map((med) => (
             <MedicationCard key={med.id} medication={med}
               onEdit={() => { setEditingMed(med); setShowForm(true) }} />

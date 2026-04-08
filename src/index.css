@@ -303,3 +303,14 @@ textarea { resize: vertical; min-height: 80px; }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 4px; }
+
+/* iOS-style grouped list */
+.ios-list {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--gray-200);
+  overflow: hidden;
+}
+.ios-list > * + * {
+  border-top: 1px solid var(--gray-100);
+}
