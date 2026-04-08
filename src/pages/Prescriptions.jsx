@@ -31,17 +31,38 @@ function formatPhase(phase, unit) {
   }).join(' · ')
 }
 
-function formatMedPosology(med) {
+function formatDuration(days) {
+  if (days == null) return 'en continu'
+  if (days % 30 === 0) return `${days / 30} mois`
+  if (days % 7 === 0) return `${days / 7} semaine${days / 7 > 1 ? 's' : ''}`
+  return `${days} jour${days > 1 ? 's' : ''}`
+}
+
+function formatMedPosology(med, prescStartDate, showDates) {
   const phases = med.prescription_phases || []
   if (!phases.length) return []
+  const start = parseISO(prescStartDate)
+
   return phases.map((phase) => {
-    const line = formatPhase(phase, med.unit)
-    if (!line) return null
-    if (phases.length === 1) return line
+    const posology = formatPhase(phase, med.unit)
+    if (!posology) return null
+
+    if (showDates) {
+      const phaseStart = addDays(start, phase.start_day - 1)
+      if (phase.duration_days == null) {
+        return `À partir du ${format(phaseStart, 'd MMM', { locale: fr })} : ${posology}`
+      }
+      const phaseEnd = addDays(phaseStart, phase.duration_days - 1)
+      return `Du ${format(phaseStart, 'd MMM', { locale: fr })} au ${format(phaseEnd, 'd MMM yyyy', { locale: fr })} : ${posology}`
+    }
+
+    // Posology view: include duration
+    const duration = formatDuration(phase.duration_days)
+    if (phases.length === 1) return `${posology} pendant ${duration}`
     const range = phase.duration_days == null
       ? `À partir de J${phase.start_day}`
       : `J${phase.start_day}–J${phase.start_day + phase.duration_days - 1}`
-    return `${range} : ${line}`
+    return `${range} (${duration}) : ${posology}`
   }).filter(Boolean)
 }
 
@@ -140,6 +161,7 @@ export default function Prescriptions() {
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState(null)
   const [activeSheet, setActiveSheet] = useState(null)
+  const [showDates, setShowDates] = useState(false)
 
   if (!activeProfile) {
     return (
@@ -159,9 +181,15 @@ export default function Prescriptions() {
     <div className="page">
       <div className="row row-between" style={{ marginBottom: 20 }}>
         <h1 className="page-title" style={{ marginBottom: 0 }}>Ordonnances</h1>
-        <button className="btn btn-primary btn-sm" onClick={() => { setEditing(null); setShowForm(true) }}>
-          + Nouvelle
-        </button>
+        <div className="row row-gap-sm">
+          <button className="btn btn-ghost btn-sm" onClick={() => setShowDates((v) => !v)}
+            title={showDates ? 'Vue posologie' : 'Vue dates'}>
+            {showDates ? '💊' : '📅'}
+          </button>
+          <button className="btn btn-primary btn-sm" onClick={() => { setEditing(null); setShowForm(true) }}>
+            + Nouvelle
+          </button>
+        </div>
       </div>
 
       {prescriptions.length === 0 ? (
@@ -196,7 +224,7 @@ export default function Prescriptions() {
                           <span className="presc-med-summary-name">
                             {med.name}{med.dosage ? ` ${med.dosage}` : ''}
                           </span>
-                          {formatMedPosology(med).map((line, i) => (
+                          {formatMedPosology(med, presc.start_date, showDates).map((line, i) => (
                             <span key={i} className="presc-med-posology-line">{line}</span>
                           ))}
                         </div>
