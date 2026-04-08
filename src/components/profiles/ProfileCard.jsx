@@ -4,7 +4,7 @@ import './ProfileCard.css'
 
 export default function ProfileCard({ profile, isActive, onSelect, onEdit }) {
   const { deleteProfile, medications, schedules } = useApp()
-  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [sheet, setSheet] = useState(null) // null | 'actions' | 'delete'
   const [deleting, setDeleting] = useState(false)
 
   const medCount = medications.length
@@ -20,62 +20,69 @@ export default function ProfileCard({ profile, isActive, onSelect, onEdit }) {
     }
   }
 
+  function handleRowTap() {
+    if (isActive) {
+      setSheet('actions')
+    } else {
+      onSelect()
+    }
+  }
+
   return (
-    <div className={`profile-card card ${isActive ? 'profile-card--active' : ''}`}>
-      <div className="profile-card-main">
-        <button className="profile-select-area" onClick={onSelect}>
-          <div
-            className="profile-avatar"
-            style={{ background: profile.avatar_color }}
-          >
-            {profile.avatar_emoji}
-          </div>
-          <div className="profile-details">
-            <div className="profile-name">{profile.name}</div>
-            {isActive && (
-              <div className="profile-stats">
-                {medCount} médicament{medCount !== 1 ? 's' : ''} · {schedCount} horaire{schedCount !== 1 ? 's' : ''}
-              </div>
-            )}
-          </div>
-          {isActive && (
-            <span className="badge badge-blue">Actif</span>
-          )}
-        </button>
-
-        <div className="profile-actions">
-          <button className="btn btn-icon btn-sm" onClick={onEdit} title="Modifier">✏️</button>
-          <button
-            className="btn btn-icon btn-sm"
-            style={{ color: 'var(--red-500)' }}
-            onClick={() => setConfirmDelete(true)}
-            title="Supprimer"
-          >
-            🗑️
-          </button>
+    <>
+      <button className={`profile-row ${isActive ? 'profile-row--active' : ''}`} onClick={handleRowTap}>
+        <div className="profile-avatar" style={{ background: profile.avatar_color }}>
+          {profile.avatar_emoji}
         </div>
-      </div>
+        <div className="profile-row-info">
+          <span className="profile-row-name">{profile.name}</span>
+          {isActive && (
+            <span className="profile-row-stats">
+              {medCount} médicament{medCount !== 1 ? 's' : ''} · {schedCount} horaire{schedCount !== 1 ? 's' : ''}
+            </span>
+          )}
+        </div>
+        {isActive
+          ? <span className="badge badge-blue">Actif</span>
+          : <span className="profile-row-hint">Sélectionner</span>
+        }
+        <span className="med-row-chevron">›</span>
+      </button>
 
-      {confirmDelete && (
-        <div className="profile-confirm">
-          <p>Supprimer <strong>{profile.name}</strong> et tous ses médicaments ?</p>
-          <div className="row row-gap-sm" style={{ marginTop: 12 }}>
-            <button
-              className="btn btn-danger btn-sm"
-              onClick={handleDelete}
-              disabled={deleting}
-            >
-              {deleting ? '...' : 'Supprimer'}
-            </button>
-            <button
-              className="btn btn-ghost btn-sm"
-              onClick={() => setConfirmDelete(false)}
-            >
-              Annuler
-            </button>
+      {sheet && (
+        <div className="action-sheet-overlay" onClick={() => setSheet(null)}>
+          <div className="action-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="action-sheet-title">{profile.name}</div>
+
+            {sheet === 'actions' && (
+              <>
+                <button className="action-sheet-btn" onClick={() => { setSheet(null); onEdit() }}>
+                  ✏️ Modifier
+                </button>
+                <button className="action-sheet-btn action-sheet-btn--danger"
+                  onClick={() => setSheet('delete')}>
+                  🗑️ Supprimer
+                </button>
+              </>
+            )}
+
+            {sheet === 'delete' && (
+              <>
+                <p className="action-sheet-message">
+                  Supprimer <strong>{profile.name}</strong> et tous ses médicaments ?
+                </p>
+                <button className="action-sheet-btn action-sheet-btn--danger"
+                  onClick={handleDelete} disabled={deleting}>
+                  {deleting ? '...' : 'Supprimer'}
+                </button>
+                <button className="action-sheet-btn" onClick={() => setSheet('actions')}>Annuler</button>
+              </>
+            )}
+
+            <button className="action-sheet-cancel" onClick={() => setSheet(null)}>Fermer</button>
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }

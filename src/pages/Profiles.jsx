@@ -39,7 +39,7 @@ export default function Profiles() {
           </button>
         </div>
       ) : (
-        <div className="stack stack-md">
+        <div className="ios-list">
           {profiles.map((profile) => (
             <ProfileCard
               key={profile.id}
