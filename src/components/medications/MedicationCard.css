@@ -1,81 +1,112 @@
-.med-card {
-  position: relative;
-}
-
-.med-card-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.med-color-bar {
-  width: 5px;
-  border-radius: 4px;
-  min-height: 48px;
-  align-self: stretch;
-  flex-shrink: 0;
-}
-
-.med-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.med-name {
-  font-size: var(--font-lg);
-  font-weight: 700;
-  color: var(--gray-900);
-}
-
-.med-dosage {
-  font-size: var(--font-base);
-  color: var(--gray-500);
-  margin-top: 2px;
-}
-
-.med-notes {
-  font-size: var(--font-sm);
-  color: var(--gray-400);
-  margin-top: 6px;
-  font-style: italic;
-}
-
-.med-actions-top {
-  display: flex;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.med-schedules {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--gray-100);
-}
-
-.schedule-item {
+.med-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--gray-50);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--gray-100);
+  flex-wrap: wrap;
 }
 
-.schedule-time {
-  font-size: var(--font-base);
-  font-weight: 700;
-  color: var(--gray-800);
-  min-width: 80px;
+.med-row:last-child {
+  border-bottom: none;
 }
 
-.schedule-days {
+.med-row-color {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.med-row-info {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.med-row-name {
+  font-size: var(--font-base);
+  font-weight: 600;
+  color: var(--gray-800);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.med-row-unit {
   font-size: var(--font-sm);
-  color: var(--gray-500);
+  color: var(--gray-400);
+  white-space: nowrap;
+}
+
+.med-row-notes {
+  font-size: var(--font-sm);
+  color: var(--gray-400);
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.med-row-take {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid var(--green-400);
+  color: var(--green-500);
+  background: none;
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  line-height: 1;
+  transition: background 0.15s;
+}
+
+.med-row-take:hover {
+  background: var(--green-50);
+}
+
+.med-row-panel {
+  width: 100%;
+  margin-top: 4px;
+  padding: 12px;
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-200);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.med-row-panel--danger {
+  background: var(--red-50);
+  border-color: var(--red-100);
+  color: var(--red-700);
+}
+
+.med-row-panel-label {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--gray-600);
+}
+
+.med-row-error {
+  font-size: var(--font-sm);
+  color: var(--red-500);
 }
 
 .med-confirm {
-  margin-top: 16px;
-  padding: 16px;
+  width: 100%;
+  margin-top: 4px;
+  padding: 12px;
   background: var(--red-50);
   border-radius: var(--radius-md);
   border: 1px solid var(--red-100);

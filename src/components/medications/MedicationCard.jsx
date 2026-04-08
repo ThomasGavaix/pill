@@ -40,39 +40,33 @@ export default function MedicationCard({ medication, onEdit }) {
   }
 
   return (
-    <div className="med-card card">
-      <div className="med-card-header">
-        <div className="med-color-bar" style={{ background: medication.color }} />
-        <div className="med-info">
-          <div className="med-name">{medication.name}</div>
-          <div className="med-dosage">{medication.unit}</div>
-          {medication.notes && <div className="med-notes">{medication.notes}</div>}
-        </div>
-        <div className="med-stock-badge">
-          {medication.stock_count != null ? (
-            <span className={`badge ${medication.stock_count <= 5 ? 'badge-red' : 'badge-gray'}`}>
-              {medication.stock_count <= 0 ? '⚠️ Rupture' : `Stock : ${medication.stock_count}`}
-            </span>
-          ) : null}
-        </div>
-        <div className="med-actions-top">
-          <button className="btn btn-icon btn-sm" onClick={onEdit} title="Modifier">✏️</button>
-          <button className="btn btn-icon btn-sm" style={{ color: 'var(--red-500)' }}
-            onClick={() => setConfirmDelete(true)} title="Supprimer">🗑️</button>
-        </div>
+    <div className="med-row">
+      <div className="med-row-color" style={{ background: medication.color }} />
+
+      <div className="med-row-info">
+        <span className="med-row-name">{medication.name}</span>
+        <span className="med-row-unit">{medication.unit}</span>
+        {medication.notes && <span className="med-row-notes">{medication.notes}</span>}
       </div>
 
-      <button className="btn btn-success btn-full" style={{ marginTop: 8 }}
-        onClick={() => { setShowTake(true); setTakeTime(nowTime()); setTakeError(null) }}>
-        + Prendre maintenant
-      </button>
+      {medication.stock_count != null && (
+        <span className={`badge ${medication.stock_count <= 0 ? 'badge-red' : medication.stock_count <= 5 ? 'badge-red' : 'badge-gray'}`}>
+          {medication.stock_count <= 0 ? '⚠️ Rupture' : `${medication.stock_count}`}
+        </span>
+      )}
+
+      <button className="med-row-take" onClick={() => { setShowTake(!showTake); setTakeTime(nowTime()); setTakeError(null) }}
+        title="Prendre maintenant">+</button>
+
+      <button className="btn btn-icon btn-sm" onClick={onEdit} title="Modifier">✏️</button>
+      <button className="btn btn-icon btn-sm" style={{ color: 'var(--red-400)' }}
+        onClick={() => setConfirmDelete(true)} title="Supprimer">🗑️</button>
 
       {showTake && (
-        <div className="med-confirm">
-          <p>Heure de prise — <strong>{medication.name}</strong></p>
-          <input type="time" value={takeTime} onChange={(e) => setTakeTime(e.target.value)}
-            style={{ marginTop: 8, marginBottom: 8 }} />
-          {takeError && <div className="alert alert-error" style={{ marginBottom: 8 }}>{takeError}</div>}
+        <div className="med-row-panel">
+          <span className="med-row-panel-label">Heure de prise</span>
+          <input type="time" value={takeTime} onChange={(e) => setTakeTime(e.target.value)} />
+          {takeError && <span className="med-row-error">{takeError}</span>}
           <div className="row row-gap-sm">
             <button className="btn btn-success btn-sm" onClick={handleTake} disabled={taking}>
               {taking ? '...' : 'Confirmer'}
@@ -83,9 +77,9 @@ export default function MedicationCard({ medication, onEdit }) {
       )}
 
       {confirmDelete && (
-        <div className="med-confirm">
-          <p>Supprimer <strong>{medication.name}</strong> ?</p>
-          <div className="row row-gap-sm" style={{ marginTop: 12 }}>
+        <div className="med-row-panel med-row-panel--danger">
+          <span>Supprimer <strong>{medication.name}</strong> ?</span>
+          <div className="row row-gap-sm">
             <button className="btn btn-danger btn-sm" onClick={handleDelete} disabled={deleting}>
               {deleting ? '...' : 'Supprimer'}
             </button>
