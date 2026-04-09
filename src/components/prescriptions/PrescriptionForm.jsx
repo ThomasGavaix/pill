@@ -35,7 +35,7 @@ export default function PrescriptionForm({ prescription, onClose }) {
     if (prescription?.prescription_meds?.length) {
       return prescription.prescription_meds.map((m) => ({
         name: m.name, dosage: m.dosage || '', unit: m.unit, color: m.color,
-        dateMode: false,
+        dateMode: true,
         phases: (m.prescription_phases || []).map((ph) => ({
           start_day: ph.start_day,
           duration_days: ph.duration_days ?? 7,
