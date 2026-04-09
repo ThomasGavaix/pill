@@ -305,7 +305,12 @@ export default function PrescriptionForm({ prescription, onClose }) {
                               <div className="form-group">
                                 <label>Date de début</label>
                                 <input type="date" value={phase.date_start}
-                                  onChange={(e) => setPhase(mi, pi, 'date_start', e.target.value)} />
+                                  onChange={(e) => {
+                                    setPhase(mi, pi, 'date_start', e.target.value)
+                                    if (!phase.date_end || e.target.value > phase.date_end) {
+                                      setPhase(mi, pi, 'date_end', e.target.value)
+                                    }
+                                  }} />
                               </div>
                               {!phase.no_end && (
                                 <div className="form-group">
