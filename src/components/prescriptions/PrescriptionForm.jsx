@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { differenceInDays, addDays, parseISO } from 'date-fns'
+import { differenceInDays, addDays, parseISO, format } from 'date-fns'
 import { useApp } from '../../contexts/AppContext'
 import './PrescriptionForm.css'
 
@@ -8,8 +8,11 @@ const UNITS = ['comprimé(s)', 'gélule(s)', 'ml', 'gouttes', 'bouffée(s)', 'sa
 
 function newTime() { return { time_of_day: '08:00', quantity: '1' } }
 
+function toLocalDate(date) {
+  return format(date, 'yyyy-MM-dd')
+}
 function dayToDate(prescStart, day) {
-  return addDays(parseISO(prescStart), day - 1).toISOString().split('T')[0]
+  return toLocalDate(addDays(parseISO(prescStart), day - 1))
 }
 function dateToDay(prescStart, date) {
   return Math.max(1, differenceInDays(parseISO(date), parseISO(prescStart)) + 1)
@@ -54,7 +57,7 @@ function newMed(prescStart) {
   return {
     name: '', dosage: '', unit: 'comprimé(s)', color: '#2563eb',
     phaseMode: 'period', dateMode: false,
-    phases: [{ start_day: 1, duration_days: 7, no_end: false, date_start: prescStart, date_end: addDays(parseISO(prescStart), 6).toISOString().split('T')[0], times: [newTime()] }],
+    phases: [{ start_day: 1, duration_days: 7, no_end: false, date_start: prescStart, date_end: toLocalDate(addDays(parseISO(prescStart), 6)), times: [newTime()] }],
     selectedDays: [], sharedTimes: [newTime()], dayDateMode: false,
   }
 }
@@ -62,12 +65,12 @@ function newMed(prescStart) {
 export default function PrescriptionForm({ prescription, onClose }) {
   const { createPrescription, updatePrescription, medications } = useApp()
   const [name, setName] = useState(prescription?.name || '')
-  const [startDate, setStartDate] = useState(prescription?.start_date || new Date().toISOString().split('T')[0])
+  const [startDate, setStartDate] = useState(prescription?.start_date || toLocalDate(new Date()))
   const [notes, setNotes] = useState(prescription?.notes || '')
   const [meds, setMeds] = useState(() =>
     prescription?.prescription_meds?.length
       ? prescription.prescription_meds.map((m) => initMed(m, prescription.start_date))
-      : [newMed(prescription?.start_date || new Date().toISOString().split('T')[0])]
+      : [newMed(prescription?.start_date || toLocalDate(new Date()))]
   )
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
@@ -85,9 +88,9 @@ export default function PrescriptionForm({ prescription, onClose }) {
     const med = meds[mi]
     const last = med.phases[med.phases.length - 1]
     const nextStart = med.dateMode
-      ? addDays(parseISO(last.date_end), 1).toISOString().split('T')[0]
+      ? toLocalDate(addDays(parseISO(last.date_end), 1))
       : last.start_day + (last.duration_days || 7)
-    const nextEnd = med.dateMode ? addDays(parseISO(nextStart), 6).toISOString().split('T')[0] : undefined
+    const nextEnd = med.dateMode ? toLocalDate(addDays(parseISO(nextStart), 6)) : undefined
     setMeds((prev) => prev.map((m, i) => i !== mi ? m : {
       ...m, phases: [...m.phases, {
         start_day: med.dateMode ? dateToDay(startDate, nextStart) : nextStart,
@@ -138,7 +141,7 @@ export default function PrescriptionForm({ prescription, onClose }) {
     const med = meds[mi]
     const last = med.selectedDays[med.selectedDays.length - 1]
     const next = med.dayDateMode
-      ? { date: last ? addDays(parseISO(last.date), 1).toISOString().split('T')[0] : startDate }
+      ? { date: last?.date ? toLocalDate(addDays(parseISO(last.date), 1)) : startDate }
       : { relDay: last ? (last.relDay || 1) + 1 : 1 }
     setMeds((prev) => prev.map((m, i) => i !== mi ? m : { ...m, selectedDays: [...m.selectedDays, next] }))
   }
