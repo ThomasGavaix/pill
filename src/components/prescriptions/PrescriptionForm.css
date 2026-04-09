@@ -122,3 +122,51 @@
   color: var(--gray-500);
   white-space: nowrap;
 }
+
+.presc-mode-toggle {
+  display: flex;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.presc-mode-btn {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  background: none;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--gray-500);
+  cursor: pointer;
+}
+
+.presc-mode-btn--active {
+  background: var(--blue-500);
+  color: white;
+  font-weight: 600;
+}
+
+.presc-days-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.presc-day-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.presc-day-row input {
+  flex: 1;
+  min-height: 44px;
+}
+
+.presc-day-label {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--gray-600);
+  min-width: 32px;
+}
