@@ -102,7 +102,7 @@ export default function Settings() {
           <div className="divider" />
           <div className="settings-row">
             <span className="settings-label">Version</span>
-            <span className="settings-value">1.0.0</span>
+            <span className="settings-value">{__APP_VERSION__}</span>
           </div>
           <div className="divider" />
           <div className="settings-row">
