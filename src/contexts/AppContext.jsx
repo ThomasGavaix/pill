@@ -302,6 +302,26 @@ export function AppProvider({ children }) {
     return data
   }, [activeProfile])
 
+  const addMedToPrescription = useCallback(async (prescriptionId, medData) => {
+    const { phases, ...medBase } = medData
+    const presc = prescriptions.find((p) => p.id === prescriptionId)
+    const displayOrder = presc?.prescription_meds?.length || 0
+    const { data: med, error: medError } = await supabase
+      .from('prescription_meds').insert({ ...medBase, prescription_id: prescriptionId, display_order: displayOrder }).select().single()
+    if (medError) throw medError
+    for (const phase of phases) {
+      const { times, ...phaseBase } = phase
+      const { data: ph, error: phError } = await supabase
+        .from('prescription_phases').insert({ ...phaseBase, prescription_med_id: med.id }).select().single()
+      if (phError) throw phError
+      for (const time of times) {
+        const { error: tError } = await supabase.from('prescription_times').insert({ ...time, phase_id: ph.id })
+        if (tError) throw tError
+      }
+    }
+    await loadPrescriptions(activeProfile.id)
+  }, [activeProfile, prescriptions])
+
   const refreshToday = useCallback(() => {
     if (activeProfile) loadTodayDoseLogs(activeProfile.id)
   }, [activeProfile])
@@ -314,7 +334,7 @@ export function AppProvider({ children }) {
       createMedication, updateMedication, deleteMedication,
       createSchedule, deleteSchedule,
       markDose, logAdHocDose, cancelAdHocDose, refreshToday,
-      createPrescription, updatePrescription, deletePrescription, duplicatePrescription,
+      createPrescription, updatePrescription, deletePrescription, duplicatePrescription, addMedToPrescription,
       reload: loadProfiles,
     }}>
       {children}

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useApp } from '../../contexts/AppContext'
+import AddToPrescriptionModal from './AddToPrescriptionModal'
 import './MedicationCard.css'
 
 function nowTime() {
@@ -10,6 +11,7 @@ function nowTime() {
 export default function MedicationCard({ medication, onEdit }) {
   const { deleteMedication, logAdHocDose } = useApp()
   const [sheet, setSheet] = useState(null) // null | 'actions' | 'take' | 'delete'
+  const [showPrescribeModal, setShowPrescribeModal] = useState(false)
   const [takeTime, setTakeTime] = useState(nowTime)
   const [taking, setTaking] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -73,6 +75,10 @@ export default function MedicationCard({ medication, onEdit }) {
                   onClick={() => openSheet('take')}>
                   + Prendre maintenant
                 </button>
+                <button className="action-sheet-btn"
+                  onClick={() => { setSheet(null); setShowPrescribeModal(true) }}>
+                  📋 Planifier dans une ordonnance
+                </button>
                 <button className="action-sheet-btn" onClick={() => { setSheet(null); onEdit() }}>
                   ✏️ Modifier
                 </button>
@@ -114,6 +120,12 @@ export default function MedicationCard({ medication, onEdit }) {
             <button className="action-sheet-cancel" onClick={() => setSheet(null)}>Fermer</button>
           </div>
         </div>
+      )}
+      {showPrescribeModal && (
+        <AddToPrescriptionModal
+          medication={medication}
+          onClose={() => setShowPrescribeModal(false)}
+        />
       )}
     </>
   )

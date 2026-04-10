@@ -1,0 +1,92 @@
+.atp-med-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-200);
+  margin-bottom: 4px;
+}
+
+.atp-med-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.atp-med-name {
+  flex: 1;
+  font-size: var(--font-base);
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.atp-med-unit {
+  font-size: var(--font-sm);
+  color: var(--gray-500);
+}
+
+.atp-presc-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.atp-presc-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--white);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.1s;
+}
+
+.atp-presc-row + .atp-presc-row {
+  border-top: 1px solid var(--gray-100);
+}
+
+.atp-presc-row:active {
+  background: var(--gray-50);
+}
+
+.atp-presc-row--selected {
+  background: var(--blue-50, #eff6ff);
+}
+
+.atp-presc-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.atp-presc-name {
+  font-size: var(--font-base);
+  font-weight: 600;
+  color: var(--gray-800);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.atp-presc-date {
+  font-size: var(--font-xs);
+  color: var(--gray-500);
+}
+
+.atp-check {
+  color: var(--blue-500);
+  font-weight: 700;
+  font-size: 1rem;
+}
