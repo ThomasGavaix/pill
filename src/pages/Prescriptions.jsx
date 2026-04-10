@@ -78,8 +78,17 @@ function formatMedPosology(med, prescStartDate, showDates) {
     }
 
     // Posology view: include duration
-    const duration = formatDuration(phase.duration_days)
-    if (phases.length === 1) return `${posology} pendant ${duration}`
+    if (phases.length === 1) {
+      if (phase.duration_days == null) {
+        return phase.start_day === 1
+          ? `${posology} en continu`
+          : `${posology} à partir de J${phase.start_day}`
+      }
+      if (phase.start_day === 1) {
+        return `${posology} pendant ${formatDuration(phase.duration_days)}`
+      }
+      return `${posology} de J${phase.start_day} à J${phase.start_day + phase.duration_days - 1}`
+    }
     const range = phase.duration_days == null
       ? `À partir de J${phase.start_day}`
       : `J${phase.start_day}–J${phase.start_day + phase.duration_days - 1}`
