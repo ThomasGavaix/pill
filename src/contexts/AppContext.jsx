@@ -186,6 +186,23 @@ export function AppProvider({ children }) {
   }, [activeProfile])
 
   // Prescriptions CRUD
+  async function syncMedsTocatalog(meds, profileId, currentMeds) {
+    for (const med of meds) {
+      if (!med.name?.trim()) continue
+      const exists = currentMeds.some(
+        (m) => m.name.trim().toLowerCase() === med.name.trim().toLowerCase()
+      )
+      if (!exists) {
+        const { data } = await supabase
+          .from('medications')
+          .insert({ name: med.name, dosage: med.dosage || null, unit: med.unit, color: med.color, profile_id: profileId, active: true })
+          .select().single()
+        if (data) currentMeds = [...currentMeds, data]
+      }
+    }
+    return currentMeds
+  }
+
   const createPrescription = useCallback(async (prescData) => {
     const { meds, ...prescBase } = prescData
     // Insert prescription
@@ -214,9 +231,11 @@ export function AppProvider({ children }) {
       }
     }
 
+    const synced = await syncMedsTocatalog(meds, activeProfile.id, medications)
+    setMedications(synced)
     await loadPrescriptions(activeProfile.id)
     return presc
-  }, [activeProfile])
+  }, [activeProfile, medications])
 
   const updatePrescription = useCallback(async (id, prescData) => {
     const { meds, ...prescBase } = prescData
@@ -246,8 +265,10 @@ export function AppProvider({ children }) {
       }
     }
 
+    const synced = await syncMedsTocatalog(meds, activeProfile.id, medications)
+    setMedications(synced)
     await loadPrescriptions(activeProfile.id)
-  }, [activeProfile])
+  }, [activeProfile, medications])
 
   const deletePrescription = useCallback(async (id) => {
     const { error } = await supabase.from('prescriptions').delete().eq('id', id)
