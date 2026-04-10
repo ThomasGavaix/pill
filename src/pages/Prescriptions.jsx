@@ -182,7 +182,7 @@ export default function Prescriptions() {
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState(null)
   const [activeSheet, setActiveSheet] = useState(null)
-  const [showDates, setShowDates] = useState(false)
+  const [showDates, setShowDates] = useState(true)
 
   if (!activeProfile) {
     return (
@@ -203,10 +203,12 @@ export default function Prescriptions() {
       <div className="row row-between" style={{ marginBottom: 20 }}>
         <h1 className="page-title" style={{ marginBottom: 0 }}>Ordonnances</h1>
         <div className="row row-gap-sm">
-          <button className="btn btn-ghost btn-sm" onClick={() => setShowDates((v) => !v)}
-            title={showDates ? 'Vue posologie' : 'Vue dates'}>
-            {showDates ? '💊' : '📅'}
-          </button>
+          <div className="presc-mode-toggle" style={{ fontSize: 'var(--font-sm)' }}>
+            <button className={`presc-mode-btn ${showDates ? 'presc-mode-btn--active' : ''}`}
+              onClick={() => setShowDates(true)}>📅 Dates</button>
+            <button className={`presc-mode-btn ${!showDates ? 'presc-mode-btn--active' : ''}`}
+              onClick={() => setShowDates(false)}>💊 Posologie</button>
+          </div>
           <button className="btn btn-primary btn-sm" onClick={() => { setEditing(null); setShowForm(true) }}>
             + Nouvelle
           </button>

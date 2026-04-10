@@ -1,3 +1,28 @@
+.presc-mode-toggle {
+  display: flex;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.presc-mode-btn {
+  flex: 1;
+  padding: 6px 10px;
+  border: none;
+  background: none;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--gray-500);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.presc-mode-btn--active {
+  background: var(--blue-500);
+  color: white;
+  font-weight: 600;
+}
+
 .presc-row {
   display: flex;
   align-items: center;
