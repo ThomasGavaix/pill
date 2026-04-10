@@ -38,10 +38,31 @@ function formatDuration(days) {
   return `${days} jour${days > 1 ? 's' : ''}`
 }
 
+function isIsolatedDays(phases) {
+  if (!phases.length) return false
+  if (!phases.every((ph) => ph.duration_days === 1)) return false
+  const ref = JSON.stringify((phases[0].prescription_times || []).map((t) => ({ time_of_day: t.time_of_day, quantity: t.quantity })))
+  return phases.every((ph) =>
+    JSON.stringify((ph.prescription_times || []).map((t) => ({ time_of_day: t.time_of_day, quantity: t.quantity }))) === ref
+  )
+}
+
 function formatMedPosology(med, prescStartDate, showDates) {
   const phases = med.prescription_phases || []
   if (!phases.length) return []
   const start = parseISO(prescStartDate)
+
+  // Isolated days: all duration_days=1 with identical posology → group into 2 lines
+  if (isIsolatedDays(phases)) {
+    const posology = formatPhase(phases[0], med.unit)
+    if (!posology) return []
+    const dayLabels = phases.map((ph) =>
+      showDates
+        ? format(addDays(start, ph.start_day - 1), 'd MMM', { locale: fr })
+        : `J${ph.start_day}`
+    )
+    return [posology, dayLabels.join(' · ')]
+  }
 
   return phases.map((phase) => {
     const posology = formatPhase(phase, med.unit)
