@@ -369,10 +369,6 @@ export default function PrescriptionForm({ prescription, onClose }) {
     setExpandedMed(mi)
   }
 
-  function buildPhasesFromMed(m) {
-    return _buildPhasesFromMed(m, startDate)
-  }
-
   async function handleSubmit(e) {
     e.preventDefault()
     setSaving(true)
@@ -380,7 +376,7 @@ export default function PrescriptionForm({ prescription, onClose }) {
     try {
       const data = {
         name, start_date: startDate, notes,
-        meds: meds.map((m) => ({ name: m.name, dosage: m.dosage, unit: m.unit, color: m.color, phases: buildPhasesFromMed(m) })),
+        meds: meds.map((m) => ({ name: m.name, dosage: m.dosage, unit: m.unit, color: m.color, phases: buildPhasesFromMed(m, startDate) })),
       }
       if (prescription) await updatePrescription(prescription.id, data)
       else await createPrescription(data)
