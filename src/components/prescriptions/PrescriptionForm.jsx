@@ -132,19 +132,13 @@ export function MedPhaseEditor({ med, mi, startDate, setMed, setPhase, addPhase,
         <div className="stack stack-md">
           <div className="presc-section-header">
             <div className="section-title" style={{ margin: 0 }}>Périodes</div>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={() => addPhase(mi)}>+ Période</button>
-          </div>
-          <div className="presc-mode-toggle">
-            <button type="button"
-              className={`presc-mode-btn ${!med.dateMode ? 'presc-mode-btn--active' : ''}`}
-              onClick={() => setMed(mi, 'dateMode', false)}>
-              🔢 Jours
-            </button>
-            <button type="button"
-              className={`presc-mode-btn ${med.dateMode ? 'presc-mode-btn--active' : ''}`}
-              onClick={() => setMed(mi, 'dateMode', true)}>
-              📅 Dates
-            </button>
+            <div className="row row-gap-sm">
+              <button type="button" className={`btn btn-sm ${med.dateMode ? 'btn-primary' : 'btn-ghost'}`}
+                onClick={() => setMed(mi, 'dateMode', !med.dateMode)}>
+                {med.dateMode ? '📅 Dates' : '🔢 Jours'}
+              </button>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => addPhase(mi)}>+ Période</button>
+            </div>
           </div>
 
           {med.phases.map((phase, pi) => (
@@ -226,17 +220,11 @@ export function MedPhaseEditor({ med, mi, startDate, setMed, setPhase, addPhase,
 
       {med.phaseMode === 'days' && (
         <div className="stack stack-md">
-          <div className="section-title" style={{ margin: 0 }}>Jours</div>
-          <div className="presc-mode-toggle">
-            <button type="button"
-              className={`presc-mode-btn ${!med.dayDateMode ? 'presc-mode-btn--active' : ''}`}
-              onClick={() => setMed(mi, 'dayDateMode', false)}>
-              🔢 Numéros
-            </button>
-            <button type="button"
-              className={`presc-mode-btn ${med.dayDateMode ? 'presc-mode-btn--active' : ''}`}
-              onClick={() => setMed(mi, 'dayDateMode', true)}>
-              📅 Dates
+          <div className="presc-section-header">
+            <div className="section-title" style={{ margin: 0 }}>Jours</div>
+            <button type="button" className={`btn btn-sm ${med.dayDateMode ? 'btn-primary' : 'btn-ghost'}`}
+              onClick={() => setMed(mi, 'dayDateMode', !med.dayDateMode)}>
+              {med.dayDateMode ? '📅 Dates' : '🔢 Jours'}
             </button>
           </div>
 
