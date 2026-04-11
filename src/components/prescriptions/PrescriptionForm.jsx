@@ -17,6 +17,18 @@ export function dateToDay(prescStart, date) {
 }
 
 export function buildPhasesFromMed(m, startDate) {
+  if (m.phaseMode === 'recurrence') {
+    const startDay = m.dateMode ? dateToDay(startDate, m.recurrenceDateStart) : m.recurrenceStart
+    const totalDays = m.dateMode
+      ? Math.max(1, differenceInDays(parseISO(m.recurrenceDateEnd), parseISO(m.recurrenceDateStart)) + 1)
+      : m.recurrenceTotalDays
+    const endDay = startDay + totalDays - 1
+    const result = []
+    for (let day = startDay; day <= endDay; day += m.recurrenceInterval) {
+      result.push({ start_day: day, duration_days: 1, times: m.sharedTimes })
+    }
+    return result
+  }
   if (m.phaseMode === 'days') {
     return m.selectedDays.map((d) => {
       const start_day = m.dayDateMode ? dateToDay(startDate, d.date) : (d.relDay || 1)
@@ -40,9 +52,35 @@ function detectDaysMode(phases) {
   return phases.every((ph) => JSON.stringify(ph.prescription_times?.map((t) => ({ time_of_day: t.time_of_day, quantity: t.quantity }))) === ref)
 }
 
+function detectRecurrence(phases) {
+  if (phases.length < 2) return null
+  if (!phases.every((ph) => ph.duration_days === 1)) return null
+  const ref = JSON.stringify(phases[0].prescription_times?.map((t) => ({ time_of_day: t.time_of_day, quantity: t.quantity })))
+  if (!phases.every((ph) => JSON.stringify(ph.prescription_times?.map((t) => ({ time_of_day: t.time_of_day, quantity: t.quantity }))) === ref)) return null
+  const days = phases.map((ph) => ph.start_day).sort((a, b) => a - b)
+  const interval = days[1] - days[0]
+  if (interval < 2) return null
+  if (!days.every((d, i) => i === 0 || d - days[i - 1] === interval)) return null
+  return { interval, startDay: days[0], totalDays: days[days.length - 1] - days[0] + 1 }
+}
+
 function initMed(m, prescStart) {
-  const isDays = detectDaysMode(m.prescription_phases || [])
   const phases = m.prescription_phases || []
+  const rec = detectRecurrence(phases)
+  if (rec) {
+    return {
+      picked: true, name: m.name, dosage: m.dosage || '', unit: m.unit, color: m.color,
+      phaseMode: 'recurrence', dateMode: false,
+      recurrenceStart: rec.startDay,
+      recurrenceInterval: rec.interval,
+      recurrenceTotalDays: rec.totalDays,
+      recurrenceDateStart: dayToDate(prescStart, rec.startDay),
+      recurrenceDateEnd: dayToDate(prescStart, rec.startDay + rec.totalDays - 1),
+      sharedTimes: (phases[0]?.prescription_times || []).map((t) => ({ time_of_day: t.time_of_day, quantity: t.quantity })),
+      phases: [], selectedDays: [], dayDateMode: false,
+    }
+  }
+  const isDays = detectDaysMode(phases)
   if (isDays) {
     return {
       picked: true, name: m.name, dosage: m.dosage || '', unit: m.unit, color: m.color,
@@ -73,6 +111,8 @@ export function newMed(prescStart) {
     phaseMode: 'period', dateMode: false,
     phases: [{ start_day: 1, duration_days: 7, no_end: false, date_start: prescStart, date_end: toLocalDate(addDays(parseISO(prescStart), 6)), times: [newTime()] }],
     selectedDays: [], sharedTimes: [newTime()], dayDateMode: false,
+    recurrenceStart: 1, recurrenceInterval: 2, recurrenceTotalDays: 120,
+    recurrenceDateStart: prescStart, recurrenceDateEnd: toLocalDate(addDays(parseISO(prescStart), 119)),
   }
 }
 
@@ -120,6 +160,11 @@ export function MedPhaseEditor({ med, mi, startDate, setMed, setPhase, addPhase,
           className={`presc-mode-btn ${med.phaseMode === 'period' ? 'presc-mode-btn--active' : ''}`}
           onClick={() => setMed(mi, 'phaseMode', 'period')}>
           Période
+        </button>
+        <button type="button"
+          className={`presc-mode-btn ${med.phaseMode === 'recurrence' ? 'presc-mode-btn--active' : ''}`}
+          onClick={() => setMed(mi, 'phaseMode', 'recurrence')}>
+          Alternance
         </button>
         <button type="button"
           className={`presc-mode-btn ${med.phaseMode === 'days' ? 'presc-mode-btn--active' : ''}`}
@@ -215,6 +260,80 @@ export function MedPhaseEditor({ med, mi, startDate, setMed, setPhase, addPhase,
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {med.phaseMode === 'recurrence' && (
+        <div className="stack stack-md">
+          <div className="presc-section-header">
+            <div className="section-title" style={{ margin: 0 }}>Alternance</div>
+            <button type="button" className={`btn btn-sm ${med.dateMode ? 'btn-primary' : 'btn-ghost'}`}
+              onClick={() => setMed(mi, 'dateMode', !med.dateMode)}>
+              {med.dateMode ? '📅 Dates' : '🔢 Jours'}
+            </button>
+          </div>
+
+          <div className="presc-phase-block">
+            <div className="form-row">
+              <div className="form-group">
+                <label>Début</label>
+                {med.dateMode ? (
+                  <input type="date" value={med.recurrenceDateStart}
+                    onChange={(e) => setMed(mi, 'recurrenceDateStart', e.target.value)} />
+                ) : (
+                  <input type="number" min="1" value={med.recurrenceStart}
+                    onChange={(e) => setMed(mi, 'recurrenceStart', parseInt(e.target.value) || 1)} />
+                )}
+              </div>
+              <div className="form-group">
+                <label>Fin</label>
+                {med.dateMode ? (
+                  <input type="date" value={med.recurrenceDateEnd} min={med.recurrenceDateStart}
+                    onChange={(e) => setMed(mi, 'recurrenceDateEnd', e.target.value)} />
+                ) : (
+                  <input type="number" min="1" value={med.recurrenceTotalDays}
+                    onChange={(e) => setMed(mi, 'recurrenceTotalDays', parseInt(e.target.value) || 1)}
+                    placeholder="durée (jours)" />
+                )}
+              </div>
+            </div>
+            {!med.dateMode && (
+              <div style={{ fontSize: 'var(--font-xs)', color: 'var(--gray-400)', marginTop: -4 }}>
+                Durée totale de la période (ex: 120 pour 4 mois)
+              </div>
+            )}
+
+            <div className="form-group" style={{ marginTop: 8 }}>
+              <label>Fréquence</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ color: 'var(--gray-500)', fontSize: 'var(--font-sm)', whiteSpace: 'nowrap' }}>1 jour sur</span>
+                <input type="number" min="2" value={med.recurrenceInterval} style={{ width: 72 }}
+                  onChange={(e) => setMed(mi, 'recurrenceInterval', parseInt(e.target.value) || 2)} />
+              </div>
+            </div>
+
+            <div className="stack stack-sm" style={{ marginTop: 8 }}>
+              <label>Prises</label>
+              {med.sharedTimes.map((time, ti) => (
+                <div key={ti} className="presc-time-row">
+                  <input type="time" value={time.time_of_day}
+                    onChange={(e) => setSharedTime(mi, ti, 'time_of_day', e.target.value)} />
+                  <div className="presc-time-qty">
+                    <input type="text" value={time.quantity} placeholder="qté"
+                      style={{ width: 60, textAlign: 'center' }}
+                      onChange={(e) => setSharedTime(mi, ti, 'quantity', e.target.value)} />
+                    <span className="presc-time-unit">{med.unit}</span>
+                  </div>
+                  {med.sharedTimes.length > 1 && (
+                    <button type="button" className="btn btn-ghost btn-sm"
+                      style={{ color: 'var(--red-500)', padding: '4px 8px', minHeight: 'auto' }}
+                      onClick={() => removeSharedTime(mi, ti)}>✕</button>
+                  )}
+                </div>
+              ))}
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => addSharedTime(mi)}>+ Prise</button>
+            </div>
+          </div>
         </div>
       )}
 

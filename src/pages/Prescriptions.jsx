@@ -47,15 +47,31 @@ function isIsolatedDays(phases) {
   )
 }
 
+function detectRecurrenceInterval(phases) {
+  if (phases.length < 2) return null
+  const days = phases.map((ph) => ph.start_day).sort((a, b) => a - b)
+  const interval = days[1] - days[0]
+  if (interval < 2) return null
+  if (!days.every((d, i) => i === 0 || d - days[i - 1] === interval)) return null
+  return interval
+}
+
 function formatMedPosology(med, prescStartDate, showDates) {
   const phases = med.prescription_phases || []
   if (!phases.length) return []
   const start = parseISO(prescStartDate)
 
-  // Isolated days: all duration_days=1 with identical posology → group into 2 lines
+  // Recurrence: isolated days with consistent interval ≥ 2 → compact display
   if (isIsolatedDays(phases)) {
     const posology = formatPhase(phases[0], med.unit)
     if (!posology) return []
+    const interval = detectRecurrenceInterval(phases)
+    if (interval) {
+      const days = phases.map((ph) => ph.start_day).sort((a, b) => a - b)
+      const firstLabel = showDates ? format(addDays(start, days[0] - 1), 'd MMM', { locale: fr }) : `J${days[0]}`
+      const lastLabel = showDates ? format(addDays(start, days[days.length - 1] - 1), 'd MMM yyyy', { locale: fr }) : `J${days[days.length - 1]}`
+      return [posology, `1 jour sur ${interval} · ${firstLabel} → ${lastLabel}`]
+    }
     const dayLabels = phases.map((ph) =>
       showDates
         ? format(addDays(start, ph.start_day - 1), 'd MMM', { locale: fr })
