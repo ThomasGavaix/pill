@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import { format, differenceInDays, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useApp } from '../contexts/AppContext'
-import DoseCard from '../components/schedule/DoseCard'
 import { useScheduleNotifications } from '../hooks/useScheduleNotifications'
 import './Today.css'
 
@@ -59,7 +58,6 @@ export default function Today() {
   const { activeProfile, medications, schedules, doseLogs, prescriptions, markDose, cancelAdHocDose, loading } = useApp()
   const [marking, setMarking] = useState(null)
   const [markError, setMarkError] = useState(null)
-  const [viewMode, setViewMode] = useState(() => localStorage.getItem('todayView') || 'grouped')
 
   useScheduleNotifications(schedules, medications, doseLogs)
 
@@ -154,12 +152,6 @@ export default function Today() {
     }
   }
 
-  function toggleView() {
-    const next = viewMode === 'grouped' ? 'list' : 'grouped'
-    setViewMode(next)
-    localStorage.setItem('todayView', next)
-  }
-
   if (loading) return <div className="loading-page"><div className="spinner" />Chargement...</div>
 
   if (!activeProfile) {
@@ -179,9 +171,6 @@ export default function Today() {
       <div className="today-header">
         <div className="today-header-top">
           <div className="today-date">{format(today, "EEEE d MMMM yyyy", { locale: fr })}</div>
-          <button className="btn btn-ghost btn-sm today-view-toggle" onClick={toggleView} title="Changer de vue">
-            {viewMode === 'grouped' ? '☰' : '⊞'}
-          </button>
         </div>
         {stats.total > 0 && (
           <div className="today-progress">
@@ -201,7 +190,7 @@ export default function Today() {
           <div className="empty-state-title">Rien pour aujourd'hui</div>
           <div className="empty-state-text">Aucun médicament prévu.</div>
         </div>
-      ) : viewMode === 'grouped' ? (
+      ) : (
         <div className="stack stack-lg">
           {grouped.map((period) => {
             const taken = period.doses.filter((d) => d.status === 'taken').length
@@ -225,17 +214,6 @@ export default function Today() {
               </div>
             )
           })}
-        </div>
-      ) : (
-        <div className="stack stack-md">
-          {todayDoses.map((dose) => (
-            <DoseCard
-              key={dose.key}
-              dose={dose}
-              onMark={handleMark}
-              isMarking={marking === dose.key + 'taken' || marking === dose.key + 'skipped'}
-            />
-          ))}
         </div>
       )}
 
