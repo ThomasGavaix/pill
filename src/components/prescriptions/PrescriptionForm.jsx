@@ -223,9 +223,12 @@ export function MedPhaseEditor({ med, mi, startDate, setMed, setPhase, addPhase,
                   </div>
                   {!phase.no_end && (
                     <div className="form-group">
-                      <label>Durée (jours)</label>
-                      <input type="number" min="1" value={phase.duration_days}
-                        onChange={(e) => setPhase(mi, pi, 'duration_days', parseInt(e.target.value) || 1)} />
+                      <label>Fin (jour)</label>
+                      <input type="number" min={phase.start_day} value={phase.start_day + phase.duration_days - 1}
+                        onChange={(e) => {
+                          const endDay = parseInt(e.target.value) || phase.start_day
+                          setPhase(mi, pi, 'duration_days', Math.max(1, endDay - phase.start_day + 1))
+                        }} />
                     </div>
                   )}
                 </div>
