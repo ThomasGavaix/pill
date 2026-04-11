@@ -153,6 +153,7 @@ function MedPickerInline({ medications, onPick, onNew }) {
 
 // ── Phase editor (shared between Période and Jours modes) ────────────────────
 export function MedPhaseEditor({ med, mi, startDate, setMed, setPhase, addPhase, removePhase, setTime, addTime, removeTime, setSharedTime, addSharedTime, removeSharedTime, setDay, addDay, removeDay }) {
+  const [showEndDay, setShowEndDay] = useState(true)
   return (
     <>
       <div className="presc-mode-toggle">
@@ -223,12 +224,22 @@ export function MedPhaseEditor({ med, mi, startDate, setMed, setPhase, addPhase,
                   </div>
                   {!phase.no_end && (
                     <div className="form-group">
-                      <label>Fin (jour)</label>
-                      <input type="number" min={phase.start_day} value={phase.start_day + phase.duration_days - 1}
-                        onChange={(e) => {
-                          const endDay = parseInt(e.target.value) || phase.start_day
-                          setPhase(mi, pi, 'duration_days', Math.max(1, endDay - phase.start_day + 1))
-                        }} />
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <button type="button" onClick={() => setShowEndDay((v) => !v)}
+                          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: 'inherit', fontWeight: 'inherit', color: 'var(--blue-500)', textDecoration: 'underline', textUnderlineOffset: 2 }}>
+                          {showEndDay ? 'Fin (jour)' : 'Durée (jours)'}
+                        </button>
+                      </label>
+                      {showEndDay ? (
+                        <input type="number" min={phase.start_day} value={phase.start_day + phase.duration_days - 1}
+                          onChange={(e) => {
+                            const endDay = parseInt(e.target.value) || phase.start_day
+                            setPhase(mi, pi, 'duration_days', Math.max(1, endDay - phase.start_day + 1))
+                          }} />
+                      ) : (
+                        <input type="number" min="1" value={phase.duration_days}
+                          onChange={(e) => setPhase(mi, pi, 'duration_days', parseInt(e.target.value) || 1)} />
+                      )}
                     </div>
                   )}
                 </div>
