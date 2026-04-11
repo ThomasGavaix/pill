@@ -68,9 +68,14 @@ function formatMedPosology(med, prescStartDate, showDates) {
     const interval = detectRecurrenceInterval(phases)
     if (interval) {
       const days = phases.map((ph) => ph.start_day).sort((a, b) => a - b)
-      const firstLabel = showDates ? format(addDays(start, days[0] - 1), 'd MMM', { locale: fr }) : `J${days[0]}`
-      const lastLabel = showDates ? format(addDays(start, days[days.length - 1] - 1), 'd MMM yyyy', { locale: fr }) : `J${days[days.length - 1]}`
-      return [posology, `1 jour sur ${interval} · ${firstLabel} → ${lastLabel}`]
+      const totalSpan = days[days.length - 1] - days[0] + interval
+      if (showDates) {
+        const firstLabel = format(addDays(start, days[0] - 1), 'd MMM', { locale: fr })
+        const lastLabel = format(addDays(start, days[days.length - 1] - 1), 'd MMM yyyy', { locale: fr })
+        return [posology, `1 jour sur ${interval} · du ${firstLabel} au ${lastLabel}`]
+      }
+      const prefix = days[0] === 1 ? '' : `à partir de J${days[0]} · `
+      return [posology, `${prefix}1 jour sur ${interval} pendant ${formatDuration(totalSpan)}`]
     }
     const dayLabels = phases.map((ph) =>
       showDates
