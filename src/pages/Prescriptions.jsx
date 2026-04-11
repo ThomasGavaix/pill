@@ -40,14 +40,14 @@ function formatDuration(days) {
 
 function isIsolatedDays(phases) {
   if (!phases.length) return false
-  if (!phases.every((ph) => ph.duration_days === 1)) return false
+  if (!phases.every((ph) => ph.duration_days === 1 && !ph.interval_days)) return false
   const ref = JSON.stringify((phases[0].prescription_times || []).map((t) => ({ time_of_day: t.time_of_day, quantity: t.quantity })))
   return phases.every((ph) =>
     JSON.stringify((ph.prescription_times || []).map((t) => ({ time_of_day: t.time_of_day, quantity: t.quantity }))) === ref
   )
 }
 
-function detectRecurrenceInterval(phases) {
+function detectOldRecurrenceInterval(phases) {
   if (phases.length < 2) return null
   const days = phases.map((ph) => ph.start_day).sort((a, b) => a - b)
   const interval = days[1] - days[0]
@@ -61,11 +61,25 @@ function formatMedPosology(med, prescStartDate, showDates) {
   if (!phases.length) return []
   const start = parseISO(prescStartDate)
 
-  // Recurrence: isolated days with consistent interval ≥ 2 → compact display
+  // New format: single phase with interval_days
+  const recPhase = phases.length === 1 && phases[0].interval_days ? phases[0] : null
+  if (recPhase) {
+    const posology = formatPhase(recPhase, med.unit)
+    if (!posology) return []
+    if (showDates) {
+      const firstDate = addDays(start, recPhase.start_day - 1)
+      const lastDate = addDays(firstDate, recPhase.duration_days - 1)
+      return [posology, `1 jour sur ${recPhase.interval_days} · du ${format(firstDate, 'd MMM', { locale: fr })} au ${format(lastDate, 'd MMM yyyy', { locale: fr })}`]
+    }
+    const prefix = recPhase.start_day === 1 ? '' : `à partir de J${recPhase.start_day} · `
+    return [posology, `${prefix}1 jour sur ${recPhase.interval_days} pendant ${formatDuration(recPhase.duration_days)}`]
+  }
+
+  // Old format: backward compat — expanded individual days with consistent interval
   if (isIsolatedDays(phases)) {
     const posology = formatPhase(phases[0], med.unit)
     if (!posology) return []
-    const interval = detectRecurrenceInterval(phases)
+    const interval = detectOldRecurrenceInterval(phases)
     if (interval) {
       const days = phases.map((ph) => ph.start_day).sort((a, b) => a - b)
       const totalSpan = days[days.length - 1] - days[0] + interval

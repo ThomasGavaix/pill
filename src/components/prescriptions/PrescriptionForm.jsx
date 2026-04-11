@@ -22,12 +22,7 @@ export function buildPhasesFromMed(m, startDate) {
     const totalDays = m.dateMode
       ? Math.max(1, differenceInDays(parseISO(m.recurrenceDateEnd), parseISO(m.recurrenceDateStart)) + 1)
       : m.recurrenceTotalDays
-    const endDay = startDay + totalDays - 1
-    const result = []
-    for (let day = startDay; day <= endDay; day += m.recurrenceInterval) {
-      result.push({ start_day: day, duration_days: 1, times: m.sharedTimes })
-    }
-    return result
+    return [{ start_day: startDay, duration_days: totalDays, interval_days: m.recurrenceInterval, times: m.sharedTimes }]
   }
   if (m.phaseMode === 'days') {
     return m.selectedDays.map((d) => {
@@ -47,21 +42,27 @@ export function buildPhasesFromMed(m, startDate) {
 
 function detectDaysMode(phases) {
   if (!phases.length) return false
-  if (!phases.every((ph) => ph.duration_days === 1)) return false
+  if (!phases.every((ph) => ph.duration_days === 1 && !ph.interval_days)) return false
   const ref = JSON.stringify(phases[0].prescription_times?.map((t) => ({ time_of_day: t.time_of_day, quantity: t.quantity })))
   return phases.every((ph) => JSON.stringify(ph.prescription_times?.map((t) => ({ time_of_day: t.time_of_day, quantity: t.quantity }))) === ref)
 }
 
 function detectRecurrence(phases) {
+  // New format: single phase with interval_days
+  if (phases.length === 1 && phases[0].interval_days) {
+    const ph = phases[0]
+    return { interval: ph.interval_days, startDay: ph.start_day, totalDays: ph.duration_days }
+  }
+  // Old format: backward compat — detect from expanded individual days
   if (phases.length < 2) return null
-  if (!phases.every((ph) => ph.duration_days === 1)) return null
+  if (!phases.every((ph) => ph.duration_days === 1 && !ph.interval_days)) return null
   const ref = JSON.stringify(phases[0].prescription_times?.map((t) => ({ time_of_day: t.time_of_day, quantity: t.quantity })))
   if (!phases.every((ph) => JSON.stringify(ph.prescription_times?.map((t) => ({ time_of_day: t.time_of_day, quantity: t.quantity }))) === ref)) return null
   const days = phases.map((ph) => ph.start_day).sort((a, b) => a - b)
   const interval = days[1] - days[0]
   if (interval < 2) return null
   if (!days.every((d, i) => i === 0 || d - days[i - 1] === interval)) return null
-  return { interval, startDay: days[0], totalDays: days[days.length - 1] - days[0] + 1 }
+  return { interval, startDay: days[0], totalDays: days[days.length - 1] - days[0] + interval }
 }
 
 function initMed(m, prescStart) {

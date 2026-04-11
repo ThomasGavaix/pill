@@ -93,6 +93,7 @@ export default function Today() {
         for (const phase of (med.prescription_phases || [])) {
           const phaseEnd = phase.duration_days == null ? Infinity : phase.start_day + phase.duration_days - 1
           if (dayNumber < phase.start_day || dayNumber > phaseEnd) continue
+          if (phase.interval_days && (dayNumber - phase.start_day) % phase.interval_days !== 0) continue
           for (const time of (phase.prescription_times || [])) {
             const log = doseLogs.find((l) => l.prescription_time_id === time.id && l.scheduled_date === todayStr)
             doses.push({
