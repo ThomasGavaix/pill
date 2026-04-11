@@ -186,6 +186,22 @@ export function AppProvider({ children }) {
   }, [activeProfile])
 
   // Prescriptions CRUD
+  async function insertMedPhasesAndTimes(phases, medId) {
+    if (!phases.length) return
+    const { data: insertedPhases, error: phError } = await supabase
+      .from('prescription_phases')
+      .insert(phases.map(({ times, ...ph }) => ({ ...ph, prescription_med_id: medId })))
+      .select()
+    if (phError) throw phError
+    const allTimes = insertedPhases.flatMap((ph, i) =>
+      (phases[i].times || []).map((t) => ({ ...t, phase_id: ph.id }))
+    )
+    if (allTimes.length) {
+      const { error: tError } = await supabase.from('prescription_times').insert(allTimes)
+      if (tError) throw tError
+    }
+  }
+
   async function syncMedsTocatalog(meds, profileId, currentMeds) {
     for (const med of meds) {
       if (!med.name?.trim()) continue
@@ -216,19 +232,7 @@ export function AppProvider({ children }) {
       const { data: med, error: medError } = await supabase
         .from('prescription_meds').insert({ ...medBase, prescription_id: presc.id, display_order: i }).select().single()
       if (medError) throw medError
-
-      for (const phase of phases) {
-        const { times, ...phaseBase } = phase
-        const { data: ph, error: phError } = await supabase
-          .from('prescription_phases').insert({ ...phaseBase, prescription_med_id: med.id }).select().single()
-        if (phError) throw phError
-
-        for (const time of times) {
-          const { error: tError } = await supabase
-            .from('prescription_times').insert({ ...time, phase_id: ph.id })
-          if (tError) throw tError
-        }
-      }
+      await insertMedPhasesAndTimes(phases, med.id)
     }
 
     const synced = await syncMedsTocatalog(meds, activeProfile.id, medications)
@@ -250,19 +254,7 @@ export function AppProvider({ children }) {
       const { data: med, error: medError } = await supabase
         .from('prescription_meds').insert({ ...medBase, prescription_id: id, display_order: i }).select().single()
       if (medError) throw medError
-
-      for (const phase of phases) {
-        const { times, ...phaseBase } = phase
-        const { data: ph, error: phError } = await supabase
-          .from('prescription_phases').insert({ ...phaseBase, prescription_med_id: med.id }).select().single()
-        if (phError) throw phError
-
-        for (const time of times) {
-          const { error: tError } = await supabase
-            .from('prescription_times').insert({ ...time, phase_id: ph.id })
-          if (tError) throw tError
-        }
-      }
+      await insertMedPhasesAndTimes(phases, med.id)
     }
 
     const synced = await syncMedsTocatalog(meds, activeProfile.id, medications)
@@ -330,16 +322,7 @@ export function AppProvider({ children }) {
     const { data: med, error: medError } = await supabase
       .from('prescription_meds').insert({ ...medBase, prescription_id: prescriptionId, display_order: displayOrder }).select().single()
     if (medError) throw medError
-    for (const phase of phases) {
-      const { times, ...phaseBase } = phase
-      const { data: ph, error: phError } = await supabase
-        .from('prescription_phases').insert({ ...phaseBase, prescription_med_id: med.id }).select().single()
-      if (phError) throw phError
-      for (const time of times) {
-        const { error: tError } = await supabase.from('prescription_times').insert({ ...time, phase_id: ph.id })
-        if (tError) throw tError
-      }
-    }
+    await insertMedPhasesAndTimes(phases, med.id)
     await loadPrescriptions(activeProfile.id)
   }, [activeProfile, prescriptions])
 
