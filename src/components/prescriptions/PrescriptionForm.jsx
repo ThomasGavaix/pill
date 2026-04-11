@@ -89,7 +89,7 @@ function MedPickerInline({ medications, onPick, onNew }) {
           <input
             type="text" placeholder="Rechercher un médicament..."
             value={search} onChange={(e) => setSearch(e.target.value)}
-            autoFocus style={{ marginBottom: 4 }}
+            style={{ marginBottom: 4 }}
           />
           <div className="med-picker-list">
             {filtered.map((m) => (
@@ -289,7 +289,7 @@ export default function PrescriptionForm({ prescription, onClose }) {
   )
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
-  const [expandedMed, setExpandedMed] = useState(0)
+  const [expandedMed, setExpandedMed] = useState(-1)
 
   function setMed(mi, key, val) {
     setMeds((prev) => prev.map((m, i) => i === mi ? { ...m, [key]: val } : m))
@@ -399,7 +399,7 @@ export default function PrescriptionForm({ prescription, onClose }) {
             <div className="form-group">
               <label>Nom de l'ordonnance</label>
               <input type="text" placeholder="ex: Bronchite, Angine..."
-                value={name} onChange={(e) => setName(e.target.value)} required autoFocus />
+                value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
             <div className="form-group">
               <label>Date de début</label>
