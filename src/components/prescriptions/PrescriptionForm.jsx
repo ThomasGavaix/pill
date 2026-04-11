@@ -46,15 +46,15 @@ function initMed(m, prescStart) {
   if (isDays) {
     return {
       picked: true, name: m.name, dosage: m.dosage || '', unit: m.unit, color: m.color,
-      phaseMode: 'days', dayDateMode: true,
-      selectedDays: phases.map((ph) => ({ date: dayToDate(prescStart, ph.start_day) })),
+      phaseMode: 'days', dayDateMode: false,
+      selectedDays: phases.map((ph) => ({ relDay: ph.start_day, date: dayToDate(prescStart, ph.start_day) })),
       sharedTimes: (phases[0]?.prescription_times || []).map((t) => ({ time_of_day: t.time_of_day, quantity: t.quantity })),
       phases: [],
     }
   }
   return {
     picked: true, name: m.name, dosage: m.dosage || '', unit: m.unit, color: m.color,
-    phaseMode: 'period', dateMode: true,
+    phaseMode: 'period', dateMode: false,
     phases: phases.map((ph) => ({
       start_day: ph.start_day,
       duration_days: ph.duration_days ?? 7,
