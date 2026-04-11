@@ -4,13 +4,24 @@ import { useAuth } from '../contexts/AuthContext'
 import { subscribeToPush, unsubscribeFromPush, isSubscribed } from '../lib/push'
 import './Settings.css'
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
+
+function calendarUrl(token) {
+  return `${SUPABASE_URL}/functions/v1/calendar?token=${token}`
+}
+function webcalUrl(token) {
+  return calendarUrl(token).replace('https://', 'webcal://')
+}
+
 export default function Settings() {
-  const { activeProfile } = useApp()
+  const { activeProfile, regenerateCalendarToken } = useApp()
   const { user, signOut } = useAuth()
   const [pushEnabled, setPushEnabled] = useState(false)
   const [pushLoading, setPushLoading] = useState(false)
   const [pushError, setPushError] = useState(null)
   const [pushSuccess, setPushSuccess] = useState(null)
+  const [calCopied, setCalCopied] = useState(false)
+  const [calLoading, setCalLoading] = useState(false)
 
   useEffect(() => {
     isSubscribed().then(setPushEnabled)
@@ -90,6 +101,47 @@ export default function Settings() {
           )}
         </div>
       </div>
+
+      {/* Calendrier section */}
+      {activeProfile?.calendar_token && (
+        <div className="section">
+          <div className="section-title">Calendrier</div>
+          <div className="card stack stack-sm">
+            <p style={{ fontSize: 'var(--font-sm)', color: 'var(--gray-600)', lineHeight: 1.6, margin: 0 }}>
+              Abonnez-vous dans l'app <strong>Calendrier iOS</strong> pour voir vos prises comme événements avec alertes natives.
+            </p>
+            <a
+              href={webcalUrl(activeProfile.calendar_token)}
+              className="btn btn-primary btn-full"
+            >
+              Ouvrir dans Calendrier iOS
+            </a>
+            <button
+              className="btn btn-ghost btn-full btn-sm"
+              onClick={async () => {
+                await navigator.clipboard.writeText(calendarUrl(activeProfile.calendar_token))
+                setCalCopied(true)
+                setTimeout(() => setCalCopied(false), 2000)
+              }}
+            >
+              {calCopied ? 'Lien copié !' : 'Copier le lien (https)'}
+            </button>
+            <button
+              className="btn btn-ghost btn-full btn-sm"
+              style={{ color: 'var(--red-500)' }}
+              disabled={calLoading}
+              onClick={async () => {
+                if (!confirm('Réinitialiser le lien ? L\'ancien abonnement ne fonctionnera plus.')) return
+                setCalLoading(true)
+                try { await regenerateCalendarToken() }
+                finally { setCalLoading(false) }
+              }}
+            >
+              {calLoading ? '...' : 'Réinitialiser le lien'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* About section */}
       <div className="section">

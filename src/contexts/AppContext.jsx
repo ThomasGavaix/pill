@@ -326,6 +326,15 @@ export function AppProvider({ children }) {
     await loadPrescriptions(activeProfile.id)
   }, [activeProfile, prescriptions])
 
+  const regenerateCalendarToken = useCallback(async () => {
+    const token = crypto.randomUUID()
+    const { error } = await supabase.from('profiles').update({ calendar_token: token }).eq('id', activeProfile.id)
+    if (error) throw error
+    setActiveProfile((prev) => ({ ...prev, calendar_token: token }))
+    setProfiles((prev) => prev.map((p) => p.id === activeProfile.id ? { ...p, calendar_token: token } : p))
+    return token
+  }, [activeProfile])
+
   const refreshToday = useCallback(() => {
     if (activeProfile) loadTodayDoseLogs(activeProfile.id)
   }, [activeProfile])
@@ -339,6 +348,7 @@ export function AppProvider({ children }) {
       createSchedule, deleteSchedule,
       markDose, logAdHocDose, cancelAdHocDose, refreshToday,
       createPrescription, updatePrescription, deletePrescription, duplicatePrescription, addMedToPrescription,
+      regenerateCalendarToken,
       reload: loadProfiles,
     }}>
       {children}
