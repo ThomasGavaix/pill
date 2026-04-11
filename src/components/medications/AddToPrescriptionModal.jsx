@@ -205,7 +205,7 @@ export default function AddToPrescriptionModal({ medication, onClose }) {
                   <label>Nom de l'ordonnance</label>
                   <input type="text" placeholder="ex: Bronchite, Angine..."
                     value={newPrescName} onChange={(e) => setNewPrescName(e.target.value)}
-                    autoFocus />
+                    />
                 </div>
                 <div className="form-group">
                   <label>Date de début</label>

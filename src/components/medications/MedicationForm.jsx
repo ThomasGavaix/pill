@@ -61,7 +61,7 @@ export default function MedicationForm({ medication, onClose }) {
           <div className="form-group">
             <label htmlFor="med-name">Nom</label>
             <input id="med-name" type="text" placeholder="ex: Doliprane, Ventoline..."
-              value={form.name} onChange={(e) => set('name', e.target.value)} required autoFocus />
+              value={form.name} onChange={(e) => set('name', e.target.value)} required />
           </div>
 
           <div className="form-row">

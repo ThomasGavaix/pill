@@ -82,7 +82,6 @@ export default function ProfileForm({ profile, onClose }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              autoFocus
             />
           </div>
 
