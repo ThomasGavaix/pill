@@ -220,25 +220,28 @@ export function MedPhaseEditor({ med, mi, startDate, setMed, setPhase, addPhase,
                 <div className="form-row">
                   <div className="form-group">
                     <label>Début (jour)</label>
-                    <input type="number" min="1" value={phase.start_day}
+                    <input type="number" inputMode="numeric" min="1" value={phase.start_day}
                       onChange={(e) => setPhase(mi, pi, 'start_day', parseInt(e.target.value) || 1)} />
                   </div>
                   {!phase.no_end && (
                     <div className="form-group">
-                      <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <button type="button" onClick={() => setShowEndDay((v) => !v)}
-                          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: 'inherit', fontWeight: 'inherit', color: 'var(--blue-500)', textDecoration: 'underline', textUnderlineOffset: 2 }}>
-                          {showEndDay ? 'Fin (jour)' : 'Durée (jours)'}
-                        </button>
-                      </label>
+                      <div className="presc-field-toggle">
+                        <button type="button"
+                          className={`presc-field-btn ${showEndDay ? 'presc-field-btn--active' : ''}`}
+                          onClick={() => setShowEndDay(true)}>Fin</button>
+                        <button type="button"
+                          className={`presc-field-btn ${!showEndDay ? 'presc-field-btn--active' : ''}`}
+                          onClick={() => setShowEndDay(false)}>Durée</button>
+                      </div>
                       {showEndDay ? (
-                        <input type="number" min={phase.start_day} value={phase.start_day + phase.duration_days - 1}
+                        <input type="number" inputMode="numeric" min={phase.start_day}
+                          value={phase.start_day + phase.duration_days - 1}
                           onChange={(e) => {
                             const endDay = parseInt(e.target.value) || phase.start_day
                             setPhase(mi, pi, 'duration_days', Math.max(1, endDay - phase.start_day + 1))
                           }} />
                       ) : (
-                        <input type="number" min="1" value={phase.duration_days}
+                        <input type="number" inputMode="numeric" min="1" value={phase.duration_days}
                           onChange={(e) => setPhase(mi, pi, 'duration_days', parseInt(e.target.value) || 1)} />
                       )}
                     </div>
@@ -296,7 +299,7 @@ export function MedPhaseEditor({ med, mi, startDate, setMed, setPhase, addPhase,
                   <input type="date" value={med.recurrenceDateStart}
                     onChange={(e) => setMed(mi, 'recurrenceDateStart', e.target.value)} />
                 ) : (
-                  <input type="number" min="1" value={med.recurrenceStart}
+                  <input type="number" inputMode="numeric" min="1" value={med.recurrenceStart}
                     onChange={(e) => setMed(mi, 'recurrenceStart', parseInt(e.target.value) || 1)} />
                 )}
               </div>
@@ -306,7 +309,7 @@ export function MedPhaseEditor({ med, mi, startDate, setMed, setPhase, addPhase,
                   <input type="date" value={med.recurrenceDateEnd} min={med.recurrenceDateStart}
                     onChange={(e) => setMed(mi, 'recurrenceDateEnd', e.target.value)} />
                 ) : (
-                  <input type="number" min="1" value={med.recurrenceTotalDays}
+                  <input type="number" inputMode="numeric" min="1" value={med.recurrenceTotalDays}
                     onChange={(e) => setMed(mi, 'recurrenceTotalDays', parseInt(e.target.value) || 1)}
                     placeholder="durée (jours)" />
                 )}
@@ -322,7 +325,7 @@ export function MedPhaseEditor({ med, mi, startDate, setMed, setPhase, addPhase,
               <label>Fréquence</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ color: 'var(--gray-500)', fontSize: 'var(--font-sm)', whiteSpace: 'nowrap' }}>1 jour sur</span>
-                <input type="number" min="2" value={med.recurrenceInterval} style={{ width: 72 }}
+                <input type="number" inputMode="numeric" min="2" value={med.recurrenceInterval} style={{ width: 72 }}
                   onChange={(e) => setMed(mi, 'recurrenceInterval', parseInt(e.target.value) || 2)} />
               </div>
             </div>
@@ -371,7 +374,7 @@ export function MedPhaseEditor({ med, mi, startDate, setMed, setPhase, addPhase,
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
                     <span style={{ color: 'var(--gray-500)', fontSize: 'var(--font-sm)', whiteSpace: 'nowrap' }}>Jour</span>
-                    <input type="number" min="1" value={d.relDay || 1} style={{ width: 80 }}
+                    <input type="number" inputMode="numeric" min="1" value={d.relDay || 1} style={{ width: 80 }}
                       onChange={(e) => setDay(mi, di, { relDay: parseInt(e.target.value) || 1 })} />
                   </div>
                 )}

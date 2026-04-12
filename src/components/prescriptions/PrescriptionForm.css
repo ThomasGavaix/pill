@@ -220,6 +220,31 @@
   min-height: 44px;
 }
 
+.presc-field-toggle {
+  display: inline-flex;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.presc-field-btn {
+  padding: 3px 12px;
+  border: none;
+  background: none;
+  font-size: var(--font-xs);
+  font-weight: 500;
+  color: var(--gray-500);
+  cursor: pointer;
+  line-height: 1.6;
+}
+
+.presc-field-btn--active {
+  background: var(--blue-500);
+  color: white;
+  font-weight: 600;
+}
+
 .presc-day-label {
   font-size: var(--font-sm);
   font-weight: 600;
