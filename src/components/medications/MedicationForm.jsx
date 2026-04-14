@@ -6,7 +6,7 @@ const COLORS = [
   '#ea580c', '#ca8a04', '#16a34a', '#0891b2',
 ]
 
-const UNITS = ['comprimé(s)', 'gélule(s)', 'ml', 'gouttes', 'bouffée(s)', 'sachet(s)', 'patch(s)', 'autre']
+const UNITS = ['comprimé(s)', 'gélule(s)', 'ml', 'gouttes', 'bouffée(s)', 'sachet(s)', 'patch(s)', 'cuillère(s) à café', 'granules', 'dose(s)', 'autre']
 
 export default function MedicationForm({ medication, onClose }) {
   const { createMedication, updateMedication } = useApp()

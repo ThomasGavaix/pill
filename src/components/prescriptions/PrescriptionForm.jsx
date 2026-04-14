@@ -4,7 +4,7 @@ import { useApp } from '../../contexts/AppContext'
 import './PrescriptionForm.css'
 
 const COLORS = ['#2563eb', '#7c3aed', '#db2777', '#dc2626', '#ea580c', '#ca8a04', '#16a34a', '#0891b2']
-const UNITS = ['comprimé(s)', 'gélule(s)', 'ml', 'gouttes', 'bouffée(s)', 'sachet(s)', 'patch(s)', 'autre']
+const UNITS = ['comprimé(s)', 'gélule(s)', 'ml', 'gouttes', 'bouffée(s)', 'sachet(s)', 'patch(s)', 'cuillère(s) à café', 'granules', 'dose(s)', 'autre']
 
 export function newTime() { return { time_of_day: '08:00', quantity: '1' } }
 
