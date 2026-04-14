@@ -7,7 +7,7 @@
   background: var(--white);
   border-top: 1px solid var(--gray-200);
   display: flex;
-  height: var(--bottom-nav-h);
+  height: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
   box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
 }
