@@ -1,4 +1,4 @@
-// Pill + clock icon — matches the PWA home screen icon
+// Pill + check icon — matches the PWA home screen icon
 export default function AppIcon({ size = 36 }) {
   const r = size * 0.22
   const cx = size / 2
@@ -9,15 +9,16 @@ export default function AppIcon({ size = 36 }) {
   const pillY = size * 0.26
   const pillR = pillH / 2
 
-  const clockR = size * 0.19
-  const clockCx = size * 0.67
-  const clockCy = size * 0.67
+  const badgeR = size * 0.19
+  const badgeCx = size * 0.67
+  const badgeCy = size * 0.67
 
-  const handLen12 = clockR * 0.52
-  const handLen3  = clockR * 0.42
-
-  const sin = Math.sin(-Math.PI * 2 / 3)
-  const cos = Math.cos(-Math.PI * 2 / 3)
+  const ck1x = badgeCx - badgeR * 0.42
+  const ck1y = badgeCy + badgeR * 0.05
+  const ck2x = badgeCx - badgeR * 0.10
+  const ck2y = badgeCy + badgeR * 0.42
+  const ck3x = badgeCx + badgeR * 0.46
+  const ck3y = badgeCy - badgeR * 0.32
 
   return (
     <svg
@@ -50,26 +51,12 @@ export default function AppIcon({ size = 36 }) {
       <line x1={cx} y1={pillY + size * 0.025} x2={cx} y2={pillY + pillH - size * 0.025}
         stroke="#3b82f6" strokeWidth={size * 0.022} strokeLinecap="round" />
 
-      {/* Clock face */}
-      <circle cx={clockCx} cy={clockCy} r={clockR} fill="#1d4ed8" opacity={0.85} />
-      <circle cx={clockCx} cy={clockCy} r={clockR} fill="none" stroke="white" strokeWidth={size * 0.018} opacity={0.9} />
-
-      {/* Hour hand (~10 o'clock) */}
-      <line
-        x1={clockCx} y1={clockCy}
-        x2={clockCx + handLen12 * sin} y2={clockCy - handLen12 * cos}
-        stroke="white" strokeWidth={size * 0.03} strokeLinecap="round" opacity={0.95}
+      {/* Check badge */}
+      <circle cx={badgeCx} cy={badgeCy} r={badgeR} fill="#22c55e" />
+      <polyline
+        points={`${ck1x},${ck1y} ${ck2x},${ck2y} ${ck3x},${ck3y}`}
+        fill="none" stroke="white" strokeWidth={size * 0.055} strokeLinecap="round" strokeLinejoin="round"
       />
-
-      {/* Minute hand (~12 o'clock) */}
-      <line
-        x1={clockCx} y1={clockCy}
-        x2={clockCx} y2={clockCy - handLen3}
-        stroke="white" strokeWidth={size * 0.022} strokeLinecap="round" opacity={0.95}
-      />
-
-      {/* Center dot */}
-      <circle cx={clockCx} cy={clockCy} r={size * 0.022} fill="white" />
     </svg>
   )
 }

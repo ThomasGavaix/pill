@@ -1,13 +1,12 @@
 import sharp from 'sharp'
-import { writeFileSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-// SVG icon design: blue rounded-square, pill capsule upper-center, clock badge lower-right
+// SVG icon design: blue rounded-square, pill capsule upper-center, green check badge lower-right
 function makeSvg(size) {
-  const r = size * 0.22  // corner radius
+  const r = size * 0.22
   const cx = size / 2
 
   // Pill capsule: horizontal, shifted slightly upward
@@ -17,14 +16,18 @@ function makeSvg(size) {
   const pillY = size * 0.26
   const pillR = pillH / 2
 
-  // Clock badge: bottom-right
-  const clockR = size * 0.19
-  const clockCx = size * 0.67
-  const clockCy = size * 0.67
+  // Check badge: bottom-right
+  const badgeR = size * 0.19
+  const badgeCx = size * 0.67
+  const badgeCy = size * 0.67
 
-  // Clock hands
-  const handLen12 = clockR * 0.52
-  const handLen3  = clockR * 0.42
+  // Checkmark points inside badge
+  const ck1x = badgeCx - badgeR * 0.42
+  const ck1y = badgeCy + badgeR * 0.05
+  const ck2x = badgeCx - badgeR * 0.10
+  const ck2y = badgeCy + badgeR * 0.42
+  const ck3x = badgeCx + badgeR * 0.46
+  const ck3y = badgeCy - badgeR * 0.32
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
   <defs>
@@ -50,24 +53,13 @@ function makeSvg(size) {
   <line x1="${cx}" y1="${pillY + size * 0.025}" x2="${cx}" y2="${pillY + pillH - size * 0.025}"
     stroke="#3b82f6" stroke-width="${size * 0.022}" stroke-linecap="round"/>
 
-  <!-- Clock face -->
-  <circle cx="${clockCx}" cy="${clockCy}" r="${clockR}" fill="#1d4ed8" opacity="0.85"/>
-  <circle cx="${clockCx}" cy="${clockCy}" r="${clockR}" fill="none" stroke="white" stroke-width="${size * 0.018}" opacity="0.9"/>
+  <!-- Check badge circle -->
+  <circle cx="${badgeCx}" cy="${badgeCy}" r="${badgeR}" fill="#22c55e"/>
 
-  <!-- Hour hand (pointing ~10 o'clock) -->
-  <line
-    x1="${clockCx}" y1="${clockCy}"
-    x2="${clockCx + handLen12 * Math.sin(-Math.PI * 2 / 3)}" y2="${clockCy - handLen12 * Math.cos(-Math.PI * 2 / 3)}"
-    stroke="white" stroke-width="${size * 0.03}" stroke-linecap="round" opacity="0.95"/>
-
-  <!-- Minute hand (pointing ~12 o'clock) -->
-  <line
-    x1="${clockCx}" y1="${clockCy}"
-    x2="${clockCx}" y2="${clockCy - handLen3}"
-    stroke="white" stroke-width="${size * 0.022}" stroke-linecap="round" opacity="0.95"/>
-
-  <!-- Center dot -->
-  <circle cx="${clockCx}" cy="${clockCy}" r="${size * 0.022}" fill="white"/>
+  <!-- Checkmark -->
+  <polyline
+    points="${ck1x},${ck1y} ${ck2x},${ck2y} ${ck3x},${ck3y}"
+    fill="none" stroke="white" stroke-width="${size * 0.055}" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 }
 
@@ -83,14 +75,10 @@ async function generateIcon(size, filename) {
 
 await generateIcon(192, 'icon-192.png')
 await generateIcon(512, 'icon-512.png')
-
-// Apple touch icon (180x180, no transparency, same design)
 await generateIcon(180, 'apple-touch-icon.png')
 
-// Also create maskable icon (content within safe zone = 80% of size)
 async function generateMaskable(size, filename) {
   const svg = makeSvg(size)
-  // For maskable, the design already fills the full square with bg color — good
   const buf = Buffer.from(svg)
   await sharp(buf)
     .resize(size, size)
