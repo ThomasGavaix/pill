@@ -23,6 +23,28 @@ export function AppProvider({ children }) {
     }
   }, [activeProfile])
 
+  useEffect(() => {
+    if (!activeProfile) return
+    const today = new Date().toISOString().split('T')[0]
+    const channel = supabase
+      .channel(`dose-logs-${activeProfile.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'dose_logs' }, (payload) => {
+        if (payload.eventType === 'DELETE') {
+          setDoseLogs((prev) => prev.filter((l) => l.id !== payload.old.id))
+          return
+        }
+        const log = payload.new
+        if (log.profile_id !== activeProfile.id || log.scheduled_date !== today) return
+        setDoseLogs((prev) => {
+          const idx = prev.findIndex((l) => l.id === log.id)
+          if (idx >= 0) { const u = [...prev]; u[idx] = log; return u }
+          return [...prev, log]
+        })
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [activeProfile?.id])
+
   async function loadProfiles() {
     try {
       setLoading(true)
