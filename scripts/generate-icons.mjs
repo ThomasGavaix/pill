@@ -5,25 +5,18 @@ import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-// SVG icon design: blue rounded-square background, white pill capsule + medical cross
+// SVG icon design: blue rounded-square background, white pill capsule centered
 function makeSvg(size) {
   const r = size * 0.22  // corner radius
   const cx = size / 2
   const cy = size / 2
 
-  // Pill capsule: horizontal, centered slightly above middle
-  const pillW = size * 0.52
-  const pillH = size * 0.22
+  // Pill capsule: horizontal, centered
+  const pillW = size * 0.58
+  const pillH = size * 0.26
   const pillX = cx - pillW / 2
-  const pillY = cy - pillH / 2 - size * 0.04
+  const pillY = cy - pillH / 2
   const pillR = pillH / 2
-
-  // Cross (plus) symbol below pill
-  const crossW = size * 0.12
-  const crossH = size * 0.30
-  const crossX = cx - crossW / 2
-  const crossY = cy + size * 0.10
-  const crossR = size * 0.03
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
   <defs>
@@ -36,24 +29,20 @@ function makeSvg(size) {
   <!-- Background rounded square -->
   <rect width="${size}" height="${size}" rx="${r}" ry="${r}" fill="url(#bg)"/>
 
-  <!-- Pill capsule body (full) -->
+  <!-- Pill capsule body (full white) -->
   <rect x="${pillX}" y="${pillY}" width="${pillW}" height="${pillH}" rx="${pillR}" ry="${pillR}" fill="white" opacity="0.95"/>
-
-  <!-- Pill divider line -->
-  <line
-    x1="${cx}" y1="${pillY + size * 0.02}"
-    x2="${cx}" y2="${pillY + pillH - size * 0.02}"
-    stroke="#3b82f6" stroke-width="${size * 0.025}" stroke-linecap="round"/>
 
   <!-- Right half tint to show two-tone capsule -->
   <clipPath id="rightHalf">
     <rect x="${cx}" y="${pillY}" width="${pillW}" height="${pillH}"/>
   </clipPath>
-  <rect x="${pillX}" y="${pillY}" width="${pillW}" height="${pillH}" rx="${pillR}" ry="${pillR}" fill="#93c5fd" opacity="0.6" clip-path="url(#rightHalf)"/>
+  <rect x="${pillX}" y="${pillY}" width="${pillW}" height="${pillH}" rx="${pillR}" ry="${pillR}" fill="#93c5fd" opacity="0.65" clip-path="url(#rightHalf)"/>
 
-  <!-- Medical cross -->
-  <rect x="${crossX}" y="${crossY}" width="${crossW}" height="${crossH}" rx="${crossR}" ry="${crossR}" fill="white" opacity="0.9"/>
-  <rect x="${crossX - (crossH - crossW) / 2}" y="${crossY + (crossH - crossW) / 2}" width="${crossH}" height="${crossW}" rx="${crossR}" ry="${crossR}" fill="white" opacity="0.9"/>
+  <!-- Pill divider line -->
+  <line
+    x1="${cx}" y1="${pillY + size * 0.03}"
+    x2="${cx}" y2="${pillY + pillH - size * 0.03}"
+    stroke="#3b82f6" stroke-width="${size * 0.025}" stroke-linecap="round"/>
 </svg>`
 }
 
