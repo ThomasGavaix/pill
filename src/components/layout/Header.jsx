@@ -1,4 +1,5 @@
 import { useApp } from '../../contexts/AppContext'
+import AppIcon from './AppIcon'
 import './Header.css'
 
 export default function Header() {
@@ -8,7 +9,7 @@ export default function Header() {
     <header className="header">
       <div className="header-inner">
         <div className="header-brand">
-          <span className="header-logo">💊</span>
+          <AppIcon size={36} />
           <span className="header-title">PilulierFamille</span>
         </div>
         {activeProfile && (

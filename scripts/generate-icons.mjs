@@ -5,18 +5,26 @@ import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-// SVG icon design: blue rounded-square background, white pill capsule centered
+// SVG icon design: blue rounded-square, pill capsule upper-center, clock badge lower-right
 function makeSvg(size) {
   const r = size * 0.22  // corner radius
   const cx = size / 2
-  const cy = size / 2
 
-  // Pill capsule: horizontal, centered
-  const pillW = size * 0.58
-  const pillH = size * 0.26
+  // Pill capsule: horizontal, shifted slightly upward
+  const pillW = size * 0.56
+  const pillH = size * 0.24
   const pillX = cx - pillW / 2
-  const pillY = cy - pillH / 2
+  const pillY = size * 0.26
   const pillR = pillH / 2
+
+  // Clock badge: bottom-right
+  const clockR = size * 0.19
+  const clockCx = size * 0.67
+  const clockCy = size * 0.67
+
+  // Clock hands
+  const handLen12 = clockR * 0.52
+  const handLen3  = clockR * 0.42
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
   <defs>
@@ -29,20 +37,37 @@ function makeSvg(size) {
   <!-- Background rounded square -->
   <rect width="${size}" height="${size}" rx="${r}" ry="${r}" fill="url(#bg)"/>
 
-  <!-- Pill capsule body (full white) -->
+  <!-- Pill capsule body -->
   <rect x="${pillX}" y="${pillY}" width="${pillW}" height="${pillH}" rx="${pillR}" ry="${pillR}" fill="white" opacity="0.95"/>
 
-  <!-- Right half tint to show two-tone capsule -->
+  <!-- Right half tint (two-tone) -->
   <clipPath id="rightHalf">
     <rect x="${cx}" y="${pillY}" width="${pillW}" height="${pillH}"/>
   </clipPath>
   <rect x="${pillX}" y="${pillY}" width="${pillW}" height="${pillH}" rx="${pillR}" ry="${pillR}" fill="#93c5fd" opacity="0.65" clip-path="url(#rightHalf)"/>
 
   <!-- Pill divider line -->
+  <line x1="${cx}" y1="${pillY + size * 0.025}" x2="${cx}" y2="${pillY + pillH - size * 0.025}"
+    stroke="#3b82f6" stroke-width="${size * 0.022}" stroke-linecap="round"/>
+
+  <!-- Clock face -->
+  <circle cx="${clockCx}" cy="${clockCy}" r="${clockR}" fill="#1d4ed8" opacity="0.85"/>
+  <circle cx="${clockCx}" cy="${clockCy}" r="${clockR}" fill="none" stroke="white" stroke-width="${size * 0.018}" opacity="0.9"/>
+
+  <!-- Hour hand (pointing ~10 o'clock) -->
   <line
-    x1="${cx}" y1="${pillY + size * 0.03}"
-    x2="${cx}" y2="${pillY + pillH - size * 0.03}"
-    stroke="#3b82f6" stroke-width="${size * 0.025}" stroke-linecap="round"/>
+    x1="${clockCx}" y1="${clockCy}"
+    x2="${clockCx + handLen12 * Math.sin(-Math.PI * 2 / 3)}" y2="${clockCy - handLen12 * Math.cos(-Math.PI * 2 / 3)}"
+    stroke="white" stroke-width="${size * 0.03}" stroke-linecap="round" opacity="0.95"/>
+
+  <!-- Minute hand (pointing ~12 o'clock) -->
+  <line
+    x1="${clockCx}" y1="${clockCy}"
+    x2="${clockCx}" y2="${clockCy - handLen3}"
+    stroke="white" stroke-width="${size * 0.022}" stroke-linecap="round" opacity="0.95"/>
+
+  <!-- Center dot -->
+  <circle cx="${clockCx}" cy="${clockCy}" r="${size * 0.022}" fill="white"/>
 </svg>`
 }
 
