@@ -6,16 +6,18 @@ import { useScheduleNotifications } from '../hooks/useScheduleNotifications'
 import './Today.css'
 
 const PERIODS = [
-  { key: 'matin',  label: 'Matin',        icon: '🌅', from: '06:00', to: '11:59' },
-  { key: 'midi',   label: 'Midi',          icon: '☀️',  from: '12:00', to: '13:59' },
-  { key: 'soir',   label: 'Soir',          icon: '🌆', from: '14:00', to: '20:59' },
-  { key: 'nuit',   label: 'Nuit',          icon: '🌙', from: '21:00', to: '05:59' },
+  { key: 'matin',     label: 'Matin',        icon: '🌅', from: '06:00', to: '11:59' },
+  { key: 'midi',      label: 'Midi',          icon: '☀️',  from: '12:00', to: '13:59' },
+  { key: 'apmidi',    label: 'Après-midi',    icon: '🌤️', from: '14:00', to: '17:59' },
+  { key: 'soir',      label: 'Soir',          icon: '🌆', from: '18:00', to: '20:59' },
+  { key: 'nuit',      label: 'Nuit',          icon: '🌙', from: '21:00', to: '05:59' },
 ]
 
 function getPeriod(time) {
   if (time >= '06:00' && time <= '11:59') return 'matin'
   if (time >= '12:00' && time <= '13:59') return 'midi'
-  if (time >= '14:00' && time <= '20:59') return 'soir'
+  if (time >= '14:00' && time <= '17:59') return 'apmidi'
+  if (time >= '18:00' && time <= '20:59') return 'soir'
   return 'nuit'
 }
 

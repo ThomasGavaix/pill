@@ -8,8 +8,9 @@ import './Prescriptions.css'
 function getPeriodInfo(time) {
   if (time >= '06:00' && time <= '11:59') return { label: 'le matin', order: 0 }
   if (time >= '12:00' && time <= '13:59') return { label: 'à midi', order: 1 }
-  if (time >= '14:00' && time <= '20:59') return { label: 'le soir', order: 2 }
-  return { label: 'la nuit', order: 3 }
+  if (time >= '14:00' && time <= '17:59') return { label: "l'après-midi", order: 2 }
+  if (time >= '18:00' && time <= '20:59') return { label: 'le soir', order: 3 }
+  return { label: 'la nuit', order: 4 }
 }
 
 function joinFr(items) {
