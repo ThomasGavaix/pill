@@ -22,6 +22,14 @@ export default function Settings() {
   const [pushSuccess, setPushSuccess] = useState(null)
   const [calCopied, setCalCopied] = useState(false)
   const [calLoading, setCalLoading] = useState(false)
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'auto')
+
+  function handleTheme(val) {
+    setTheme(val)
+    localStorage.setItem('theme', val)
+    const dark = val === 'dark' || (val === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
+  }
 
   useEffect(() => {
     isSubscribed().then(setPushEnabled)
@@ -53,6 +61,35 @@ export default function Settings() {
   return (
     <div className="page">
       <h1 className="page-title">Réglages</h1>
+
+      {/* Apparence section */}
+      <div className="section">
+        <div className="section-title">Apparence</div>
+        <div className="card">
+          <div className="settings-row">
+            <div className="settings-info">
+              <div className="settings-label">Thème</div>
+              <div className="settings-desc">Choisissez l'apparence de l'application</div>
+            </div>
+          </div>
+          <div className="theme-picker">
+            {[
+              { val: 'light', label: 'Clair', icon: '☀️' },
+              { val: 'auto',  label: 'Auto',  icon: '⚙️' },
+              { val: 'dark',  label: 'Sombre', icon: '🌙' },
+            ].map(({ val, label, icon }) => (
+              <button
+                key={val}
+                className={`theme-btn${theme === val ? ' theme-btn--active' : ''}`}
+                onClick={() => handleTheme(val)}
+              >
+                <span className="theme-btn-icon">{icon}</span>
+                <span className="theme-btn-label">{label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* Notifications section */}
       <div className="section">

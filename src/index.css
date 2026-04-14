@@ -304,6 +304,33 @@ textarea { resize: vertical; min-height: 80px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 4px; }
 
+/* Dark mode */
+[data-theme="dark"] {
+  --white: #1e293b;
+  --gray-50: #0f172a;
+  --gray-100: #1e293b;
+  --gray-200: #334155;
+  --gray-300: #475569;
+  --gray-400: #94a3b8;
+  --gray-500: #94a3b8;
+  --gray-600: #cbd5e1;
+  --gray-700: #e2e8f0;
+  --gray-800: #f1f5f9;
+  --gray-900: #f8fafc;
+  --blue-50: rgba(59, 130, 246, 0.15);
+  --blue-100: rgba(59, 130, 246, 0.25);
+  --green-50: rgba(34, 197, 94, 0.15);
+  --green-100: rgba(34, 197, 94, 0.25);
+  --red-50: rgba(239, 68, 68, 0.15);
+  --red-100: rgba(239, 68, 68, 0.25);
+  --orange-50: rgba(249, 115, 22, 0.15);
+  --orange-100: rgba(249, 115, 22, 0.25);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.2);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.2);
+  color-scheme: dark;
+}
+
 /* iOS-style grouped list */
 .ios-list {
   background: var(--white);
