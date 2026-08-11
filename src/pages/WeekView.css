@@ -1,0 +1,110 @@
+.week-view {
+  padding-top: 4px;
+}
+
+.week-subtitle {
+  font-size: var(--font-sm);
+  color: var(--gray-500);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.week-day-card {
+  padding: 16px;
+}
+
+.week-day-card--today {
+  border: 2px solid var(--blue-500);
+}
+
+.week-day-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.week-day-name {
+  font-size: var(--font-base);
+  font-weight: 700;
+  color: var(--gray-900);
+  text-transform: capitalize;
+  flex: 1;
+}
+
+.week-day-date {
+  font-size: var(--font-sm);
+  color: var(--gray-500);
+  font-weight: 500;
+}
+
+.week-day-count {
+  font-size: var(--font-sm);
+  font-weight: 700;
+  color: var(--blue-600);
+  background: var(--blue-50);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.week-day-empty {
+  font-size: var(--font-sm);
+  color: var(--gray-400);
+  font-style: italic;
+}
+
+.week-periods {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.week-period {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.week-period-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-sm);
+  font-weight: 700;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.week-meds {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-left: 4px;
+}
+
+.week-med-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.week-med-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.week-med-name {
+  font-size: var(--font-base);
+  color: var(--gray-800);
+  flex: 1;
+}
+
+.week-med-dose {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--gray-500);
+  white-space: nowrap;
+}
