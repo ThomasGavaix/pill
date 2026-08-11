@@ -2,15 +2,16 @@ import { useMemo, useState } from 'react'
 import { format, differenceInDays, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useApp } from '../contexts/AppContext'
+import WeekView from './WeekView'
 import { useScheduleNotifications } from '../hooks/useScheduleNotifications'
 import './Today.css'
 
 const PERIODS = [
-  { key: 'matin',     label: 'Matin',        icon: '🌅', from: '06:00', to: '11:59' },
-  { key: 'midi',      label: 'Midi',          icon: '☀️',  from: '12:00', to: '13:59' },
-  { key: 'apmidi',    label: 'Après-midi',    icon: '🌤️', from: '14:00', to: '17:59' },
-  { key: 'soir',      label: 'Soir',          icon: '🌆', from: '18:00', to: '20:59' },
-  { key: 'nuit',      label: 'Nuit',          icon: '🌙', from: '21:00', to: '05:59' },
+  { key: 'matin',  label: 'Matin',      icon: '🌅', from: '06:00', to: '11:59' },
+  { key: 'midi',   label: 'Midi',       icon: '☀️',  from: '12:00', to: '13:59' },
+  { key: 'apmidi', label: 'Après-midi', icon: '🌤️', from: '14:00', to: '17:59' },
+  { key: 'soir',   label: 'Soir',       icon: '🌆', from: '18:00', to: '20:59' },
+  { key: 'nuit',   label: 'Nuit',       icon: '🌙', from: '21:00', to: '05:59' },
 ]
 
 function getPeriod(time) {
@@ -60,6 +61,7 @@ export default function Today() {
   const { activeProfile, medications, schedules, doseLogs, prescriptions, markDose, cancelAdHocDose, loading } = useApp()
   const [marking, setMarking] = useState(null)
   const [markError, setMarkError] = useState(null)
+  const [view, setView] = useState('today')
 
   useScheduleNotifications(schedules, medications, doseLogs)
 
@@ -123,7 +125,7 @@ export default function Today() {
     }
 
     return doses.sort((a, b) => a.time.localeCompare(b.time))
-  }, [schedules, medications, doseLogs, prescriptions, todayStr, todayDow, today])
+  }, [schedules, medications, doseLogs, prescriptions, todayStr, todayDow])
 
   const stats = useMemo(() => {
     const taken = todayDoses.filter((d) => d.status === 'taken').length
@@ -131,12 +133,12 @@ export default function Today() {
     return { taken, total, pct: total > 0 ? Math.round((taken / total) * 100) : 0 }
   }, [todayDoses])
 
-  const grouped = useMemo(() => {
-    return PERIODS.map((p) => ({
+  const grouped = useMemo(() => (
+    PERIODS.map((p) => ({
       ...p,
       doses: todayDoses.filter((d) => getPeriod(d.time) === p.key),
     })).filter((p) => p.doses.length > 0)
-  }, [todayDoses])
+  ), [todayDoses])
 
   async function handleMark(dose, status) {
     setMarking(dose.key + status)
@@ -174,7 +176,23 @@ export default function Today() {
         <div className="today-header-top">
           <div className="today-date">{format(today, "EEEE d MMMM yyyy", { locale: fr })}</div>
         </div>
-        {stats.total > 0 && (
+
+        <div className="today-toggle">
+          <button
+            className={`today-toggle-btn${view === 'today' ? ' today-toggle-btn--active' : ''}`}
+            onClick={() => setView('today')}
+          >
+            Aujourd'hui
+          </button>
+          <button
+            className={`today-toggle-btn${view === 'week' ? ' today-toggle-btn--active' : ''}`}
+            onClick={() => setView('week')}
+          >
+            📋 7 jours
+          </button>
+        </div>
+
+        {view === 'today' && stats.total > 0 && (
           <div className="today-progress">
             <div className="today-progress-bar">
               <div className="today-progress-fill" style={{ width: `${stats.pct}%` }} />
@@ -186,7 +204,9 @@ export default function Today() {
 
       {markError && <div className="alert alert-error" style={{ marginBottom: 12 }}>{markError}</div>}
 
-      {todayDoses.length === 0 ? (
+      {view === 'week' ? (
+        <WeekView />
+      ) : todayDoses.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">🌿</div>
           <div className="empty-state-title">Rien pour aujourd'hui</div>
@@ -219,7 +239,7 @@ export default function Today() {
         </div>
       )}
 
-      {stats.total > 0 && stats.taken === stats.total && (
+      {view === 'today' && stats.total > 0 && stats.taken === stats.total && (
         <div className="today-congrats">
           <span>🎉</span>
           <span>Tous les médicaments ont été pris !</span>
